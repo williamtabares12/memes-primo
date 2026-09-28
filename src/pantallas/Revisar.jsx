@@ -1,13 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import SelectorHoraProgramada from "../componentes/SelectorHoraProgramada.jsx";
+import AvisoDeshacer from "../componentes/AvisoDeshacer.jsx";
 import {
   IconoDescartar,
   IconoElegir,
   IconoGuardar,
 } from "../componentes/Iconos.jsx";
+
+// Umbral de arrastre (en px) para que un swipe cuente como decisión,
+// y qué tan lejos se anima la tarjeta al salir volando.
+const UMBRAL_SWIPE = 90;
+const DISTANCIA_SALIDA = 500;
 
 // Pantalla Revisar (David, celular). Una imagen a la vez, con la
 // fuente arriba, el texto editable y tres botones grandes: Descartar,
@@ -31,10 +37,24 @@ export default function Revisar() {
   const [error, setError] = useState("");
 
   const [mostrarPaginas, setMostrarPaginas] = useState(false);
-  // Mapa id de página -> hora programada (string de <input type="datetime-local">
-  // o "" si no se puso hora). Pedido de David: opcional y por página.
+  // Mapa id de página -> { fecha, hora } (hora programada, obligatoria
+  // por página desde que David lo pidió).
   const [paginasMarcadas, setPaginasMarcadas] = useState(new Map());
   const [aviso, setAviso] = useState(null); // { paginas_repetidas: [...] } | null
+
+  // Deshacer: guarda qué imagen y qué decisión se acaba de tomar, para
+  // poder revertirla mientras el aviso sigue visible.
+  const [deshacer, setDeshacer] = useState(null); // { imagenId, mensaje } | null
+
+  // Swipe: arrastreX es el desplazamiento horizontal actual de la
+  // tarjeta; arrastrando controla si se anima el resorte/salida.
+  const [arrastreX, setArrastreX] = useState(0);
+  const [arrastrando, setArrastrando] = useState(false);
+  const inicioArrastreRef = useRef(null);
+  // Se pone en true apenas un swipe cruza el umbral, para no dejar
+  // empezar otro arrastre mientras la tarjeta sale volando y se pide
+  // la decisión (cargandoDecision solo se activa un poco después).
+  const bloqueadoRef = useRef(false);
 
   const cargarSiguiente = useCallback(async () => {
     const respuesta = await fetch(
@@ -51,6 +71,8 @@ export default function Revisar() {
     setTexto(datos.imagen?.texto ?? "");
     setPaginasMarcadas(new Map());
     setAviso(null);
+    setArrastreX(0);
+    setArrastrando(false);
     setEstado(ESTADO_LISTO);
   }, [codigo]);
 
@@ -62,16 +84,23 @@ export default function Revisar() {
     cargarSiguiente();
   }, [codigo, cargarSiguiente]);
 
+  const ETIQUETAS_DECISION = {
+    descartada: "Descartada",
+    guardada: "Guardada",
+    elegida: "Elegida",
+  };
+
   async function enviarDecision(decision, extra = {}) {
     setCargandoDecision(true);
     setError("");
+    const imagenDecidida = imagen.id;
     try {
       const respuesta = await fetch("/.netlify/functions/decidir-imagen", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           codigo,
-          imagen_id: imagen.id,
+          imagen_id: imagenDecidida,
           decision,
           texto,
           ...extra,
@@ -87,6 +116,8 @@ export default function Revisar() {
         }
         setError(datos.error ?? "No se pudo guardar.");
         setCargandoDecision(false);
+        setArrastreX(0);
+        bloqueadoRef.current = false;
         return;
       }
 
@@ -94,15 +125,64 @@ export default function Revisar() {
         const datos = await respuesta.json().catch(() => ({}));
         setError(datos.error ?? "No se pudo guardar.");
         setCargandoDecision(false);
+        setArrastreX(0);
+        bloqueadoRef.current = false;
         return;
       }
 
       setMostrarPaginas(false);
+      setDeshacer({ imagenId: imagenDecidida, mensaje: ETIQUETAS_DECISION[decision] });
       await cargarSiguiente();
     } catch {
       setError("No se pudo conectar con el servidor.");
+      setArrastreX(0);
     }
     setCargandoDecision(false);
+    bloqueadoRef.current = false;
+  }
+
+  async function deshacerDecision() {
+    if (!deshacer) return;
+    const { imagenId } = deshacer;
+    setDeshacer(null);
+    await fetch("/.netlify/functions/deshacer-decision", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ codigo, imagen_id: imagenId }),
+    });
+    await cargarSiguiente();
+  }
+
+  // --- Swipe: izquierda descarta, derecha guarda. "Elegir" solo por
+  // botón, porque necesita abrir el selector de páginas y hora. ---
+  function alPresionar(evento) {
+    if (cargandoDecision || mostrarPaginas || bloqueadoRef.current) return;
+    inicioArrastreRef.current = evento.clientX;
+    evento.currentTarget.setPointerCapture?.(evento.pointerId);
+    setArrastrando(true);
+  }
+
+  function alMover(evento) {
+    if (inicioArrastreRef.current === null) return;
+    setArrastreX(evento.clientX - inicioArrastreRef.current);
+  }
+
+  function alSoltar() {
+    if (inicioArrastreRef.current === null) return;
+    inicioArrastreRef.current = null;
+
+    if (arrastreX <= -UMBRAL_SWIPE) {
+      bloqueadoRef.current = true;
+      setArrastreX(-DISTANCIA_SALIDA);
+      setTimeout(() => enviarDecision("descartada"), 160);
+    } else if (arrastreX >= UMBRAL_SWIPE) {
+      bloqueadoRef.current = true;
+      setArrastreX(DISTANCIA_SALIDA);
+      setTimeout(() => enviarDecision("guardada"), 160);
+    } else {
+      setArrastreX(0);
+    }
+    setArrastrando(false);
   }
 
   function alternarPagina(id) {
@@ -166,14 +246,29 @@ export default function Revisar() {
         <div className="contador">{restantes} por revisar</div>
       </div>
 
-      <div className="tarjeta" style={{ padding: 10 }}>
+      <div className="tarjeta" style={{ padding: 10, overflow: "hidden" }}>
         <p style={estiloFuente}>{imagen.fuente}</p>
 
-        <img
-          src={imagen.url_ver}
-          alt="Imagen a revisar"
-          style={{ width: "100%" }}
-        />
+        <div
+          style={estiloZonaSwipe(arrastreX, arrastrando)}
+          onPointerDown={alPresionar}
+          onPointerMove={alMover}
+          onPointerUp={alSoltar}
+          onPointerCancel={alSoltar}
+        >
+          <img
+            src={imagen.url_ver}
+            alt="Imagen a revisar"
+            draggable={false}
+            style={{ width: "100%", display: "block", touchAction: "pan-y" }}
+          />
+          <span style={estiloEtiquetaSwipe("descartar", arrastreX)}>Descartar</span>
+          <span style={estiloEtiquetaSwipe("guardar", arrastreX)}>Guardar</span>
+        </div>
+
+        <p style={{ fontSize: 12, opacity: 0.6, textAlign: "center", margin: "8px 0 0" }}>
+          Desliza la imagen para decidir rápido, o usa los botones de abajo
+        </p>
 
         <textarea
           value={texto}
@@ -277,6 +372,15 @@ export default function Revisar() {
           </div>
         </div>
       )}
+
+      {deshacer && (
+        <AvisoDeshacer
+          mensaje={deshacer.mensaje}
+          onDeshacer={deshacerDecision}
+          onExpirar={() => setDeshacer(null)}
+        />
+      )}
+
       <BarraInferior usuario="david" codigo={codigo} />
     </Pantalla>
   );
@@ -330,3 +434,39 @@ const estiloAviso = {
   background: "var(--error-bg)",
   color: "var(--error)",
 };
+
+function estiloZonaSwipe(arrastreX, arrastrando) {
+  const rotacion = arrastreX / 22;
+  const opacidad = Math.max(0, 1 - Math.abs(arrastreX) / 600);
+  return {
+    position: "relative",
+    touchAction: "pan-y",
+    cursor: arrastrando ? "grabbing" : "grab",
+    transform: `translateX(${arrastreX}px) rotate(${rotacion}deg)`,
+    opacity: opacidad,
+    transition: arrastrando ? "none" : "transform 220ms ease, opacity 220ms ease",
+  };
+}
+
+function estiloEtiquetaSwipe(tipo, arrastreX) {
+  const esGuardar = tipo === "guardar";
+  const activo = esGuardar ? arrastreX > 0 : arrastreX < 0;
+  const opacidad = activo ? Math.min(Math.abs(arrastreX) / UMBRAL_SWIPE, 1) : 0;
+  return {
+    position: "absolute",
+    top: 12,
+    [esGuardar ? "right" : "left"]: 12,
+    padding: "6px 12px",
+    borderRadius: 8,
+    border: `2px solid ${esGuardar ? "var(--exito)" : "var(--error)"}`,
+    color: esGuardar ? "var(--exito)" : "var(--error)",
+    background: "var(--bg)",
+    fontWeight: 800,
+    fontSize: 13,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    opacity: opacidad,
+    pointerEvents: "none",
+    transform: `rotate(${esGuardar ? -8 : 8}deg)`,
+  };
+}
