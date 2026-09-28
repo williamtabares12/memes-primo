@@ -13,3 +13,11 @@
 # (3:00 a.m. hora de Colombia). Ver docs/plan-tecnico.md.
 [functions."limpieza-diaria"]
   schedule = "0 8 * * *"
+
+# La app es de una sola página (React Router decide la pantalla en
+# el navegador), así que cualquier ruta que no sea un archivo real
+# ni una función debe devolver index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
