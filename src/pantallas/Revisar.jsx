@@ -147,9 +147,14 @@ export default function Revisar() {
     <Pantalla>
       <div style={estiloEncabezado}>
         <div style={estiloContador}>Faltan {restantes} nuevas</div>
-        <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} style={estiloEnlace}>
-          Guardadas y descartadas
-        </Link>
+        <div style={{ display: "flex", gap: 10 }}>
+          <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} style={estiloEnlace}>
+            Guardadas y descartadas
+          </Link>
+          <Link to={`/armar?codigo=${encodeURIComponent(codigo)}`} style={estiloEnlace}>
+            Por armar
+          </Link>
+        </div>
       </div>
 
       <p style={estiloFuente}>{imagen.fuente}</p>

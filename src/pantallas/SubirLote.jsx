@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 // Pantalla "Subir lote" (Alejandro, H1). Elige las imágenes, escribe
 // la fuente una sola vez y sube. Las imágenes van directo a R2 desde
@@ -149,6 +149,12 @@ export default function SubirLote() {
         <button onClick={subirOtroLote} style={estiloBotonPrincipal}>
           Subir otro lote
         </button>
+        <Link
+          to={`/armar?codigo=${encodeURIComponent(codigo)}`}
+          style={{ textAlign: "center", color: "var(--accent)", textDecoration: "none" }}
+        >
+          Ir a Por armar
+        </Link>
       </Pantalla>
     );
   }
