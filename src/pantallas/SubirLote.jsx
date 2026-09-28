@@ -75,34 +75,46 @@ export default function SubirLote() {
       return;
     }
 
-    const { imagenes } = await respuesta.json();
+    let imagenes;
+    try {
+      ({ imagenes } = await respuesta.json());
+    } catch {
+      setErrores(["El servidor respondió con algo inesperado. Intenta de nuevo."]);
+      setEstado(ESTADO_LISTO);
+      return;
+    }
+
     const erroresSubida = [];
     let hechas = 0;
 
-    // Se suben de a poco en paralelo (5 a la vez) para no saturar la
-    // conexión del celular con 75 subidas simultáneas.
-    const TAMANO_LOTE_PARALELO = 5;
-    for (let inicio = 0; inicio < imagenes.length; inicio += TAMANO_LOTE_PARALELO) {
-      const tanda = imagenes.slice(inicio, inicio + TAMANO_LOTE_PARALELO);
-      await Promise.all(
-        tanda.map(async (imagen, indiceEnTanda) => {
-          const archivo = archivos[inicio + indiceEnTanda];
-          try {
-            const subida = await fetch(imagen.url_subida, {
-              method: "PUT",
-              headers: { "content-type": archivo.type || "application/octet-stream" },
-              body: archivo,
-            });
-            if (!subida.ok) {
+    try {
+      // Se suben de a poco en paralelo (5 a la vez) para no saturar la
+      // conexión del celular con 75 subidas simultáneas.
+      const TAMANO_LOTE_PARALELO = 5;
+      for (let inicio = 0; inicio < imagenes.length; inicio += TAMANO_LOTE_PARALELO) {
+        const tanda = imagenes.slice(inicio, inicio + TAMANO_LOTE_PARALELO);
+        await Promise.all(
+          tanda.map(async (imagen, indiceEnTanda) => {
+            const archivo = archivos[inicio + indiceEnTanda];
+            try {
+              const subida = await fetch(imagen.url_subida, {
+                method: "PUT",
+                headers: { "content-type": archivo.type || "application/octet-stream" },
+                body: archivo,
+              });
+              if (!subida.ok) {
+                erroresSubida.push(`${imagen.nombre_original}: falló la subida.`);
+              }
+            } catch {
               erroresSubida.push(`${imagen.nombre_original}: falló la subida.`);
             }
-          } catch {
-            erroresSubida.push(`${imagen.nombre_original}: falló la subida.`);
-          }
-          hechas += 1;
-          setProgreso({ hechas, total: imagenes.length });
-        })
-      );
+            hechas += 1;
+            setProgreso({ hechas, total: imagenes.length });
+          })
+        );
+      }
+    } catch {
+      erroresSubida.push("Algo inesperado interrumpió la subida.");
     }
 
     setErrores(erroresSubida);

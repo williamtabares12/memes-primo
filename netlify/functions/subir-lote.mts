@@ -79,65 +79,84 @@ export default async (req: Request) => {
 
   const db = clienteDb();
 
-  const { data: lote, error: errorLote } = await db
-    .from("lotes")
-    .insert({ fuente, subido_por: usuario })
-    .select("id")
-    .single();
+  try {
+    const { data: lote, error: errorLote } = await db
+      .from("lotes")
+      .insert({ fuente, subido_por: usuario })
+      .select("id")
+      .single();
 
-  if (errorLote || !lote) {
-    return respuestaError(
-      `No se pudo crear el lote: ${errorLote?.message ?? "error desconocido"}`,
-      500
+    if (errorLote || !lote) {
+      console.error("subir-lote: error creando el lote:", errorLote?.message);
+      return respuestaError(
+        `No se pudo crear el lote: ${errorLote?.message ?? "error desconocido"}`,
+        500
+      );
+    }
+
+    // Se guarda un id por archivo (0001, 0002…) para poder emparejar
+    // cada fila creada con su archivo original sin depender del
+    // orden en que Postgres devuelva las filas insertadas.
+    const filasImagenes = archivos.map((archivo, indice) => ({
+      lote_id: lote.id,
+      ruta_archivo: `lotes/${lote.id}/${indice}-${nombreSeguro(archivo.nombre)}`,
+      estado: "nueva" as const,
+    }));
+
+    const { data: imagenesCreadas, error: errorImagenes } = await db
+      .from("imagenes")
+      .insert(filasImagenes)
+      .select("id, ruta_archivo");
+
+    if (errorImagenes || !imagenesCreadas) {
+      console.error(
+        "subir-lote: error registrando imágenes:",
+        errorImagenes?.message
+      );
+      return respuestaError(
+        `No se pudieron registrar las imágenes: ${
+          errorImagenes?.message ?? "error desconocido"
+        }`,
+        500
+      );
+    }
+
+    // ruta_archivo empieza con "<indice>-", así que se puede leer el
+    // índice original desde ahí sin asumir el orden de la respuesta.
+    const r2 = clienteR2();
+    const bucket = bucketR2();
+
+    const resultado = await Promise.all(
+      imagenesCreadas.map(async (imagen) => {
+        const indice = Number(imagen.ruta_archivo.split("/").pop()?.split("-")[0]);
+        const tipo = archivos[indice]?.tipo || "application/octet-stream";
+        const comando = new PutObjectCommand({
+          Bucket: bucket,
+          Key: imagen.ruta_archivo,
+          ContentType: tipo,
+        });
+        const url_subida = await getSignedUrl(r2, comando, {
+          expiresIn: SEGUNDOS_VALIDEZ_URL,
+        });
+        return {
+          imagen_id: imagen.id,
+          nombre_original: archivos[indice]?.nombre,
+          url_subida,
+        };
+      })
     );
-  }
 
-  const r2 = clienteR2();
-  const bucket = bucketR2();
-
-  const filasImagenes = archivos.map((archivo) => ({
-    lote_id: lote.id,
-    ruta_archivo: `lotes/${lote.id}/${nombreSeguro(archivo.nombre)}`,
-    estado: "nueva" as const,
-  }));
-
-  const { data: imagenesCreadas, error: errorImagenes } = await db
-    .from("imagenes")
-    .insert(filasImagenes)
-    .select("id, ruta_archivo");
-
-  if (errorImagenes || !imagenesCreadas) {
+    return new Response(
+      JSON.stringify({ lote_id: lote.id, imagenes: resultado }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  } catch (err) {
+    console.error("subir-lote: error inesperado:", err);
     return respuestaError(
-      `No se pudieron registrar las imágenes: ${
-        errorImagenes?.message ?? "error desconocido"
+      `Error inesperado al preparar la subida: ${
+        err instanceof Error ? err.message : "desconocido"
       }`,
       500
     );
   }
-
-  // Mismo orden en que se insertaron, así que se pueden emparejar
-  // por índice con el arreglo "archivos" original.
-  const resultado = await Promise.all(
-    imagenesCreadas.map(async (imagen, indice) => {
-      const tipo = archivos[indice]?.tipo || "application/octet-stream";
-      const comando = new PutObjectCommand({
-        Bucket: bucket,
-        Key: imagen.ruta_archivo,
-        ContentType: tipo,
-      });
-      const url_subida = await getSignedUrl(r2, comando, {
-        expiresIn: SEGUNDOS_VALIDEZ_URL,
-      });
-      return {
-        imagen_id: imagen.id,
-        nombre_original: archivos[indice]?.nombre,
-        url_subida,
-      };
-    })
-  );
-
-  return new Response(
-    JSON.stringify({ lote_id: lote.id, imagenes: resultado }),
-    { status: 200, headers: { "content-type": "application/json" } }
-  );
 };
