@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
+import BarraInferior from "../componentes/BarraInferior.jsx";
 import { IconoElegir, IconoRecuperar } from "../componentes/Iconos.jsx";
 
 // Pantalla Guardadas y descartadas (David, H5). Dos pilas en pestañas;
@@ -136,12 +137,7 @@ export default function GuardadasDescartadas() {
 
   return (
     <Pantalla>
-      <div className="barra-superior">
-        <h1>Guardadas y descartadas</h1>
-        <Link to={`/revisar?codigo=${encodeURIComponent(codigo)}`} className="chip">
-          Revisar
-        </Link>
-      </div>
+      <h1>Guardadas y descartadas</h1>
 
       <div style={estiloPestanas}>
         <button
@@ -255,6 +251,7 @@ export default function GuardadasDescartadas() {
           </div>
         </div>
       )}
+      <BarraInferior usuario="david" codigo={codigo} />
     </Pantalla>
   );
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
+import BarraInferior from "../componentes/BarraInferior.jsx";
 import {
   IconoDescartar,
   IconoElegir,
@@ -145,6 +146,7 @@ export default function Revisar() {
         <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} className="chip" style={{ alignSelf: "flex-start" }}>
           Ver guardadas y descartadas
         </Link>
+        <BarraInferior usuario="david" codigo={codigo} />
       </Pantalla>
     );
   }
@@ -152,15 +154,8 @@ export default function Revisar() {
   return (
     <Pantalla>
       <div className="barra-superior">
+        <h1>Revisar</h1>
         <div className="contador">Faltan {restantes} nuevas</div>
-        <div className="nav-enlaces">
-          <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} className="chip">
-            Guardadas
-          </Link>
-          <Link to={`/armar?codigo=${encodeURIComponent(codigo)}`} className="chip">
-            Por armar
-          </Link>
-        </div>
       </div>
 
       <div className="tarjeta" style={{ padding: 10 }}>
@@ -273,6 +268,7 @@ export default function Revisar() {
           </div>
         </div>
       )}
+      <BarraInferior usuario="david" codigo={codigo} />
     </Pantalla>
   );
 }

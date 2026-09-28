@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
+import BarraInferior from "../componentes/BarraInferior.jsx";
 import BarraProgreso from "../componentes/BarraProgreso.jsx";
 import { IconoCheck, IconoSubir } from "../componentes/Iconos.jsx";
 
@@ -187,6 +188,7 @@ export default function SubirLote() {
         >
           Ir a Por armar
         </Link>
+        <BarraInferior usuario="alejandro" codigo={codigo} />
       </Pantalla>
     );
   }
@@ -259,6 +261,7 @@ export default function SubirLote() {
           </>
         )}
       </button>
+      <BarraInferior usuario="alejandro" codigo={codigo} />
     </Pantalla>
   );
 }

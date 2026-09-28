@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
+import BarraInferior from "../componentes/BarraInferior.jsx";
 import {
   IconoCheck,
   IconoCopiar,
@@ -155,14 +156,7 @@ export default function PorArmar() {
 
   return (
     <Pantalla>
-      <div className="barra-superior">
-        <h1>Por armar</h1>
-        {usuario === "david" && (
-          <Link to={`/revisar?codigo=${encodeURIComponent(codigo)}`} className="chip">
-            Revisar
-          </Link>
-        )}
-      </div>
+      <h1>Por armar</h1>
 
       {paginas.length > 0 && (
         <select value={filtroPagina} onChange={(evento) => setFiltroPagina(evento.target.value)}>
@@ -191,6 +185,7 @@ export default function PorArmar() {
           onSubirCaptura={(archivo) => subirCaptura(pieza.id, archivo)}
         />
       ))}
+      <BarraInferior usuario={usuario} codigo={codigo} />
     </Pantalla>
   );
 }
