@@ -155,7 +155,7 @@ export default function Revisar() {
     <Pantalla>
       <div className="barra-superior">
         <h1>Revisar</h1>
-        <div className="contador">Faltan {restantes} nuevas</div>
+        <div className="contador">{restantes} por revisar</div>
       </div>
 
       <div className="tarjeta" style={{ padding: 10 }}>
