@@ -237,7 +237,12 @@ export default function GuardadasDescartadas() {
               <button
                 onClick={() => confirmarElegir(false)}
                 disabled={paginasMarcadas.size === 0}
-                style={{ ...estiloBotonPequeno, background: "var(--accent)", color: "#fff" }}
+                style={{
+                  ...estiloBotonPequeno,
+                  background: "var(--accent)",
+                  color: "#fff",
+                  ...(paginasMarcadas.size === 0 ? estiloBotonDeshabilitado : {}),
+                }}
               >
                 Confirmar
               </button>
@@ -339,6 +344,11 @@ const estiloBotonPequeno = {
   border: "none",
   fontWeight: 600,
   cursor: "pointer",
+};
+
+const estiloBotonDeshabilitado = {
+  opacity: 0.45,
+  cursor: "not-allowed",
 };
 
 const estiloAviso = {

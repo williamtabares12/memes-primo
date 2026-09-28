@@ -215,10 +215,24 @@ export default function SubirLote() {
         <p style={{ color: "var(--error)" }}>{errores[0]}</p>
       )}
 
+      {!subiendo && (!fuente.trim() || archivos.length === 0) && (
+        <p style={{ color: "var(--text)", fontSize: 14, opacity: 0.75 }}>
+          {!fuente.trim() && "Escribe la fuente"}
+          {!fuente.trim() && archivos.length === 0 && " y elige las imágenes"}
+          {fuente.trim() && archivos.length === 0 && "Elige las imágenes"}
+          {" para poder subir."}
+        </p>
+      )}
+
       <button
         onClick={subirLote}
         disabled={subiendo || !fuente.trim() || archivos.length === 0}
-        style={estiloBotonPrincipal}
+        style={{
+          ...estiloBotonPrincipal,
+          ...(subiendo || !fuente.trim() || archivos.length === 0
+            ? estiloBotonDeshabilitado
+            : {}),
+        }}
       >
         {subiendo ? "Subiendo…" : `Subir ${archivos.length || ""} imágenes`}
       </button>
@@ -269,4 +283,9 @@ const estiloBotonPrincipal = {
   fontWeight: 600,
   fontSize: 16,
   cursor: "pointer",
+};
+
+const estiloBotonDeshabilitado = {
+  opacity: 0.45,
+  cursor: "not-allowed",
 };

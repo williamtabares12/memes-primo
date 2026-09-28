@@ -251,7 +251,14 @@ export default function Revisar() {
               <button
                 onClick={() => confirmarElegir(false)}
                 disabled={paginasMarcadas.size === 0 || cargandoDecision}
-                style={{ ...estiloBotonPequeno, background: "var(--accent)", color: "#fff" }}
+                style={{
+                  ...estiloBotonPequeno,
+                  background: "var(--accent)",
+                  color: "#fff",
+                  ...(paginasMarcadas.size === 0 || cargandoDecision
+                    ? estiloBotonDeshabilitado
+                    : {}),
+                }}
               >
                 Confirmar
               </button>
@@ -377,6 +384,11 @@ const estiloHoraProgramada = {
   border: "1px solid var(--border)",
   background: "var(--bg-suave)",
   color: "var(--text-h)",
+};
+
+const estiloBotonDeshabilitado = {
+  opacity: 0.45,
+  cursor: "not-allowed",
 };
 
 const estiloAviso = {
