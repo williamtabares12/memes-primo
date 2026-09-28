@@ -5,6 +5,7 @@ import BarraInferior from "../componentes/BarraInferior.jsx";
 import SelectorHoraProgramada from "../componentes/SelectorHoraProgramada.jsx";
 import AvisoDeshacer from "../componentes/AvisoDeshacer.jsx";
 import { horaProgramadaISO } from "../componentes/horasFijas.js";
+import { FUENTES } from "../componentes/fuentes.js";
 import {
   IconoDescartar,
   IconoElegir,
@@ -34,6 +35,7 @@ export default function Revisar() {
   const [restantes, setRestantes] = useState(0);
   const [paginas, setPaginas] = useState([]);
   const [texto, setTexto] = useState("");
+  const [filtroFuente, setFiltroFuente] = useState("");
   const [cargandoDecision, setCargandoDecision] = useState(false);
   const [error, setError] = useState("");
 
@@ -58,9 +60,9 @@ export default function Revisar() {
   const bloqueadoRef = useRef(false);
 
   const cargarSiguiente = useCallback(async () => {
-    const respuesta = await fetch(
-      `/.netlify/functions/siguiente-imagen?codigo=${encodeURIComponent(codigo)}`
-    );
+    const qs = new URLSearchParams({ codigo });
+    if (filtroFuente) qs.set("fuente", filtroFuente);
+    const respuesta = await fetch(`/.netlify/functions/siguiente-imagen?${qs}`);
     if (!respuesta.ok) {
       setEstado(ESTADO_ENLACE_INVALIDO);
       return;
@@ -75,7 +77,7 @@ export default function Revisar() {
     setArrastreX(0);
     setArrastrando(false);
     setEstado(ESTADO_LISTO);
-  }, [codigo]);
+  }, [codigo, filtroFuente]);
 
   useEffect(() => {
     if (!codigo) {
@@ -227,10 +229,26 @@ export default function Revisar() {
     );
   }
 
+  const selectorFuente = (
+    <select
+      value={filtroFuente}
+      onChange={(evento) => setFiltroFuente(evento.target.value)}
+      style={{ fontSize: 14 }}
+    >
+      <option value="">Todas las fuentes</option>
+      {FUENTES.map((f) => (
+        <option key={f} value={f}>
+          {f}
+        </option>
+      ))}
+    </select>
+  );
+
   if (!imagen) {
     return (
       <Pantalla>
         <h1>Revisar</h1>
+        {selectorFuente}
         <p>No hay imágenes nuevas por revisar.</p>
         <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} className="chip" style={{ alignSelf: "flex-start" }}>
           Ver guardadas y descartadas
@@ -246,6 +264,8 @@ export default function Revisar() {
         <h1>Revisar</h1>
         <div className="contador">{restantes} por revisar</div>
       </div>
+
+      {selectorFuente}
 
       <div className="tarjeta" style={{ padding: 10, overflow: "hidden" }}>
         <p style={estiloFuente}>{imagen.fuente}</p>

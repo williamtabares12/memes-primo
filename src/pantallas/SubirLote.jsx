@@ -4,6 +4,7 @@ import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import BarraProgreso from "../componentes/BarraProgreso.jsx";
 import { IconoCheck, IconoSubir } from "../componentes/Iconos.jsx";
+import { FUENTES } from "../componentes/fuentes.js";
 
 // Pantalla "Subir lote" (Alejandro, H1). Elige las imágenes, escribe
 // la fuente una sola vez y sube. Las imágenes van directo a R2 desde
@@ -15,8 +16,6 @@ const ESTADO_LISTO = "listo";
 const ESTADO_SUBIENDO = "subiendo";
 const ESTADO_TERMINADO = "terminado";
 const ESTADO_ENLACE_INVALIDO = "enlace_invalido";
-
-const FUENTES = ["Guarromantico", "ZonaFarandula-Cosquilla"];
 
 export default function SubirLote() {
   const [searchParams] = useSearchParams();
