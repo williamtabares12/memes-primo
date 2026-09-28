@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import Pantalla from "../componentes/Pantalla.jsx";
+import BarraProgreso from "../componentes/BarraProgreso.jsx";
+import { IconoCheck, IconoSubir } from "../componentes/Iconos.jsx";
 
 // Pantalla "Subir lote" (Alejandro, H1). Elige las imágenes, escribe
 // la fuente una sola vez y sube. Las imágenes van directo a R2 desde
 // el navegador: esta pantalla solo habla con /subir-lote para pedir
 // las URL firmadas, nunca sube el archivo a través de Netlify.
 
-const ESTADO_INICIAL = "inicial";
 const ESTADO_VALIDANDO = "validando";
 const ESTADO_LISTO = "listo";
 const ESTADO_SUBIENDO = "subiendo";
@@ -147,23 +149,41 @@ export default function SubirLote() {
     const exitosas = progreso.total - errores.length;
     return (
       <Pantalla>
-        <h1>Listo</h1>
-        <p>
-          Se subieron {exitosas} de {progreso.total} imágenes.
-        </p>
-        {errores.length > 0 && (
-          <ul style={{ color: "var(--error)", textAlign: "left" }}>
-            {errores.map((error) => (
-              <li key={error}>{error}</li>
-            ))}
-          </ul>
-        )}
-        <button onClick={subirOtroLote} style={estiloBotonPrincipal}>
+        <div className="tarjeta" style={{ textAlign: "center", padding: 24 }}>
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              background: "var(--exito-bg)",
+              color: "var(--exito)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 12px",
+            }}
+          >
+            <IconoCheck />
+          </div>
+          <h1>Listo</h1>
+          <p style={{ marginTop: 6 }}>
+            Se subieron {exitosas} de {progreso.total} imágenes.
+          </p>
+          {errores.length > 0 && (
+            <ul style={{ color: "var(--error)", textAlign: "left", fontSize: 14 }}>
+              {errores.map((error) => (
+                <li key={error}>{error}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <button onClick={subirOtroLote} className="btn btn-primario btn-grande">
           Subir otro lote
         </button>
         <Link
           to={`/armar?codigo=${encodeURIComponent(codigo)}`}
-          style={{ textAlign: "center", color: "var(--accent)", textDecoration: "none" }}
+          className="chip"
+          style={{ alignSelf: "center", padding: "8px 16px" }}
         >
           Ir a Por armar
         </Link>
@@ -177,7 +197,7 @@ export default function SubirLote() {
     <Pantalla>
       <h1>Subir lote</h1>
 
-      <label style={estiloCampo}>
+      <label className="campo">
         Fuente
         <input
           type="text"
@@ -185,11 +205,10 @@ export default function SubirLote() {
           onChange={(evento) => setFuente(evento.target.value)}
           placeholder="Ej. Cosquilla-Zona Farándula"
           disabled={subiendo}
-          style={estiloInput}
         />
       </label>
 
-      <label style={estiloCampo}>
+      <label className="campo">
         Imágenes
         <input
           ref={inputArchivosRef}
@@ -202,21 +221,24 @@ export default function SubirLote() {
       </label>
 
       {archivos.length > 0 && !subiendo && (
-        <p>{archivos.length} imágenes seleccionadas.</p>
+        <p style={{ margin: 0, fontSize: 14 }}>{archivos.length} imágenes seleccionadas.</p>
       )}
 
       {subiendo && (
-        <p>
-          Subiendo… {progreso.hechas} de {progreso.total}
-        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <p style={{ margin: 0, fontSize: 14 }}>
+            Subiendo… {progreso.hechas} de {progreso.total}
+          </p>
+          <BarraProgreso hechas={progreso.hechas} total={progreso.total} />
+        </div>
       )}
 
       {errores.length > 0 && (
-        <p style={{ color: "var(--error)" }}>{errores[0]}</p>
+        <p style={{ color: "var(--error)", fontSize: 14, margin: 0 }}>{errores[0]}</p>
       )}
 
       {!subiendo && (!fuente.trim() || archivos.length === 0) && (
-        <p style={{ color: "var(--text)", fontSize: 14, opacity: 0.75 }}>
+        <p style={{ color: "var(--text)", fontSize: 13, opacity: 0.75, margin: 0 }}>
           {!fuente.trim() && "Escribe la fuente"}
           {!fuente.trim() && archivos.length === 0 && " y elige las imágenes"}
           {fuente.trim() && archivos.length === 0 && "Elige las imágenes"}
@@ -227,65 +249,16 @@ export default function SubirLote() {
       <button
         onClick={subirLote}
         disabled={subiendo || !fuente.trim() || archivos.length === 0}
-        style={{
-          ...estiloBotonPrincipal,
-          ...(subiendo || !fuente.trim() || archivos.length === 0
-            ? estiloBotonDeshabilitado
-            : {}),
-        }}
+        className="btn btn-primario btn-grande"
       >
-        {subiendo ? "Subiendo…" : `Subir ${archivos.length || ""} imágenes`}
+        {subiendo ? (
+          "Subiendo…"
+        ) : (
+          <>
+            <IconoSubir /> Subir {archivos.length || ""} imágenes
+          </>
+        )}
       </button>
     </Pantalla>
   );
 }
-
-function Pantalla({ children }) {
-  return (
-    <main
-      style={{
-        maxWidth: 480,
-        margin: "0 auto",
-        padding: "24px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 16,
-      }}
-    >
-      {children}
-    </main>
-  );
-}
-
-const estiloCampo = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 6,
-  fontWeight: 600,
-  color: "var(--text-h)",
-};
-
-const estiloInput = {
-  font: "inherit",
-  padding: "10px 12px",
-  borderRadius: 8,
-  border: "1px solid var(--border)",
-  background: "var(--bg-suave)",
-  color: "var(--text-h)",
-};
-
-const estiloBotonPrincipal = {
-  padding: "14px 20px",
-  borderRadius: 10,
-  border: "none",
-  background: "var(--accent)",
-  color: "#fff",
-  fontWeight: 600,
-  fontSize: 16,
-  cursor: "pointer",
-};
-
-const estiloBotonDeshabilitado = {
-  opacity: 0.45,
-  cursor: "not-allowed",
-};

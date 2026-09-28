@@ -3,6 +3,7 @@ import SubirLote from "./pantallas/SubirLote.jsx";
 import Revisar from "./pantallas/Revisar.jsx";
 import GuardadasDescartadas from "./pantallas/GuardadasDescartadas.jsx";
 import PorArmar from "./pantallas/PorArmar.jsx";
+import Pantalla from "./componentes/Pantalla.jsx";
 
 // Cada persona entra con su propio enlace privado, algo como:
 //   /subir?codigo=<LINK_CODE_ALEJANDRO>
@@ -12,10 +13,10 @@ import PorArmar from "./pantallas/PorArmar.jsx";
 
 function Inicio() {
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "24px 16px" }}>
+    <Pantalla>
       <h1>App de memes</h1>
       <p>Este enlace no lleva a ninguna pantalla. Pídele a Alejandro el tuyo.</p>
-    </main>
+    </Pantalla>
   );
 }
 

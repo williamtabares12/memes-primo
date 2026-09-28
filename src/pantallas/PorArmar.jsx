@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import Pantalla from "../componentes/Pantalla.jsx";
+import {
+  IconoCheck,
+  IconoCopiar,
+  IconoDescargar,
+  IconoImagen,
+  IconoReloj,
+} from "../componentes/Iconos.jsx";
 
 // Pantalla Por armar (H2, H6, H10). La ven Alejandro y David: lista
 // de imágenes Elegidas o Armadas con páginas pendientes. Cada fila
@@ -147,24 +155,17 @@ export default function PorArmar() {
 
   return (
     <Pantalla>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h1 style={{ margin: 0 }}>Por armar</h1>
+      <div className="barra-superior">
+        <h1>Por armar</h1>
         {usuario === "david" && (
-          <Link
-            to={`/revisar?codigo=${encodeURIComponent(codigo)}`}
-            style={{ fontSize: 13, color: "var(--accent)", textDecoration: "none" }}
-          >
+          <Link to={`/revisar?codigo=${encodeURIComponent(codigo)}`} className="chip">
             Revisar
           </Link>
         )}
       </div>
 
       {paginas.length > 0 && (
-        <select
-          value={filtroPagina}
-          onChange={(evento) => setFiltroPagina(evento.target.value)}
-          style={estiloSelect}
-        >
+        <select value={filtroPagina} onChange={(evento) => setFiltroPagina(evento.target.value)}>
           <option value="">Todas las páginas</option>
           {paginas.map((pagina) => (
             <option key={pagina.id} value={pagina.id}>
@@ -204,16 +205,24 @@ function TarjetaPorArmar({
   onSubirCaptura,
 }) {
   const [texto, setTexto] = useState(pieza.texto);
+  const [copiado, setCopiado] = useState(false);
   const inputCapturaRef = useRef(null);
 
+  async function copiar() {
+    await onCopiarTexto();
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 1500);
+  }
+
   return (
-    <div style={estiloTarjeta}>
-      <img
-        src={pieza.url_ver}
-        alt="Imagen"
-        style={{ width: "100%", borderRadius: 8, border: "1px solid var(--border)" }}
-      />
-      <p style={{ fontWeight: 600, color: "var(--text-h)", margin: "8px 0 4px" }}>
+    <div className="tarjeta">
+      <div style={{ position: "relative" }}>
+        <img src={pieza.url_ver} alt="Imagen" style={{ width: "100%" }} />
+        <span style={estiloBadgeEstado(pieza.estado)}>
+          {pieza.estado === "armada" ? "Armada" : "Elegida"}
+        </span>
+      </div>
+      <p style={{ fontWeight: 700, color: "var(--text-h)", margin: "10px 0 6px" }}>
         {pieza.fuente}
       </p>
 
@@ -223,20 +232,21 @@ function TarjetaPorArmar({
           onChange={(evento) => setTexto(evento.target.value)}
           onBlur={() => onGuardarTexto(texto)}
           rows={2}
-          style={estiloTextarea}
+          style={{ flex: 1 }}
         />
-        <button onClick={onCopiarTexto} style={estiloBotonTarjeta}>
-          Copiar
+        <button onClick={copiar} className="btn btn-chico btn-secundario" style={{ height: 42 }}>
+          {copiado ? <IconoCheck /> : <IconoCopiar />}
         </button>
       </div>
 
-      <div style={{ margin: "10px 0" }}>
+      <div style={{ margin: "12px 0" }}>
         {pieza.publicaciones.map((p) => (
           <div key={p.id} style={estiloFilaPagina}>
             <div>
               <strong>{p.pagina_nombre}</strong>
               {p.hora_programada && (
-                <div style={{ fontSize: 13, opacity: 0.75 }}>
+                <div style={estiloHora}>
+                  <IconoReloj style={{ width: 14, height: 14 }} />
                   {new Date(p.hora_programada).toLocaleString("es-CO", {
                     dateStyle: "short",
                     timeStyle: "short",
@@ -244,13 +254,16 @@ function TarjetaPorArmar({
                 </div>
               )}
               {p.publicada && (
-                <div style={{ fontSize: 13, color: "var(--exito)" }}>
+                <div style={{ fontSize: 13, color: "var(--exito)", marginTop: 2 }}>
                   Publicada por {p.marcada_por}
                 </div>
               )}
             </div>
             {!p.publicada && (
-              <button onClick={() => onMarcarPublicada(p.id)} style={estiloBotonPublicada}>
+              <button
+                onClick={() => onMarcarPublicada(p.id)}
+                className="btn btn-chico btn-exito"
+              >
                 Publicada
               </button>
             )}
@@ -260,7 +273,7 @@ function TarjetaPorArmar({
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         {pieza.estado === "elegida" && usuario === "alejandro" && (
-          <button onClick={onMarcarArmada} style={estiloBotonPrincipal}>
+          <button onClick={onMarcarArmada} className="btn btn-chico btn-primario">
             Armada
           </button>
         )}
@@ -280,8 +293,9 @@ function TarjetaPorArmar({
             />
             <button
               onClick={() => inputCapturaRef.current?.click()}
-              style={estiloBotonTarjeta}
+              className="btn btn-chico btn-secundario"
             >
+              <IconoImagen />
               {pieza.url_captura ? "Cambiar captura" : "Subir captura"}
             </button>
           </>
@@ -291,9 +305,10 @@ function TarjetaPorArmar({
           <a
             href={pieza.url_captura}
             download
-            style={{ ...estiloBotonTarjeta, textDecoration: "none", textAlign: "center" }}
+            className="btn btn-chico btn-secundario"
+            style={{ textDecoration: "none" }}
           >
-            Descargar captura
+            <IconoDescargar /> Descargar
           </a>
         )}
       </div>
@@ -301,69 +316,20 @@ function TarjetaPorArmar({
   );
 }
 
-function Pantalla({ children }) {
-  return (
-    <main
-      style={{
-        maxWidth: 480,
-        margin: "0 auto",
-        padding: "16px 16px 24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-      }}
-    >
-      {children}
-    </main>
-  );
+function estiloBadgeEstado(estado) {
+  return {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    fontSize: 12,
+    fontWeight: 700,
+    padding: "4px 10px",
+    borderRadius: 999,
+    background: estado === "armada" ? "var(--exito-bg)" : "var(--accent-bg)",
+    color: estado === "armada" ? "var(--exito)" : "var(--accent)",
+    backdropFilter: "blur(4px)",
+  };
 }
-
-const estiloSelect = {
-  font: "inherit",
-  padding: "10px 12px",
-  borderRadius: 8,
-  border: "1px solid var(--border)",
-  background: "var(--bg-suave)",
-  color: "var(--text-h)",
-};
-
-const estiloTarjeta = {
-  border: "1px solid var(--border)",
-  borderRadius: 12,
-  padding: 12,
-};
-
-const estiloTextarea = {
-  flex: 1,
-  font: "inherit",
-  padding: 8,
-  borderRadius: 8,
-  border: "1px solid var(--border)",
-  background: "var(--bg-suave)",
-  color: "var(--text-h)",
-  resize: "vertical",
-};
-
-const estiloBotonTarjeta = {
-  padding: "10px 12px",
-  borderRadius: 8,
-  border: "none",
-  background: "var(--bg-suave)",
-  color: "var(--text-h)",
-  fontWeight: 600,
-  cursor: "pointer",
-  whiteSpace: "nowrap",
-};
-
-const estiloBotonPrincipal = {
-  padding: "10px 16px",
-  borderRadius: 8,
-  border: "none",
-  background: "var(--accent)",
-  color: "#fff",
-  fontWeight: 600,
-  cursor: "pointer",
-};
 
 const estiloFilaPagina = {
   display: "flex",
@@ -374,13 +340,11 @@ const estiloFilaPagina = {
   borderBottom: "1px solid var(--border)",
 };
 
-const estiloBotonPublicada = {
-  padding: "8px 12px",
-  borderRadius: 8,
-  border: "none",
-  background: "var(--exito-bg)",
-  color: "var(--exito)",
-  fontWeight: 600,
-  cursor: "pointer",
-  whiteSpace: "nowrap",
+const estiloHora = {
+  display: "flex",
+  alignItems: "center",
+  gap: 4,
+  fontSize: 13,
+  opacity: 0.75,
+  marginTop: 2,
 };

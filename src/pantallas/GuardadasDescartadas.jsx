@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import Pantalla from "../componentes/Pantalla.jsx";
+import { IconoElegir, IconoRecuperar } from "../componentes/Iconos.jsx";
 
 // Pantalla Guardadas y descartadas (David, H5). Dos pilas en pestañas;
 // cada tarjeta permite recuperar (vuelve a Nueva) o elegir (mismo
@@ -134,12 +136,9 @@ export default function GuardadasDescartadas() {
 
   return (
     <Pantalla>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h1 style={{ margin: 0 }}>Guardadas y descartadas</h1>
-        <Link
-          to={`/revisar?codigo=${encodeURIComponent(codigo)}`}
-          style={{ fontSize: 13, color: "var(--accent)", textDecoration: "none" }}
-        >
+      <div className="barra-superior">
+        <h1>Guardadas y descartadas</h1>
+        <Link to={`/revisar?codigo=${encodeURIComponent(codigo)}`} className="chip">
           Revisar
         </Link>
       </div>
@@ -147,13 +146,15 @@ export default function GuardadasDescartadas() {
       <div style={estiloPestanas}>
         <button
           onClick={() => setPestana("guardada")}
-          style={{ ...estiloPestana, ...(pestana === "guardada" ? estiloPestanaActiva : {}) }}
+          className={`btn btn-chico ${pestana === "guardada" ? "btn-primario" : "btn-secundario"}`}
+          style={{ flex: 1 }}
         >
           Guardadas
         </button>
         <button
           onClick={() => setPestana("descartada")}
-          style={{ ...estiloPestana, ...(pestana === "descartada" ? estiloPestanaActiva : {}) }}
+          className={`btn btn-chico ${pestana === "descartada" ? "btn-primario" : "btn-secundario"}`}
+          style={{ flex: 1 }}
         >
           Descartadas
         </button>
@@ -166,28 +167,29 @@ export default function GuardadasDescartadas() {
 
       {!cargando &&
         imagenes.map((imagen) => (
-          <div key={imagen.id} style={estiloTarjeta}>
-            <img
-              src={imagen.url_ver}
-              alt="Miniatura"
-              style={{ width: "100%", borderRadius: 8, border: "1px solid var(--border)" }}
-            />
-            <p style={{ fontWeight: 600, color: "var(--text-h)", margin: "8px 0 2px" }}>
+          <div key={imagen.id} className="tarjeta">
+            <img src={imagen.url_ver} alt="Miniatura" style={{ width: "100%" }} />
+            <p style={{ fontWeight: 700, color: "var(--text-h)", margin: "10px 0 2px" }}>
               {imagen.fuente}
             </p>
             {imagen.texto && <p style={{ margin: "0 0 8px" }}>{imagen.texto}</p>}
-            <p style={{ fontSize: 13, opacity: 0.7, margin: "0 0 8px" }}>
+            <p style={{ fontSize: 13, opacity: 0.7, margin: "0 0 10px" }}>
               Se borra el {new Date(imagen.fecha_caducidad).toLocaleDateString("es-CO")}
             </p>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => recuperar(imagen.id)} style={estiloBotonTarjeta}>
-                Recuperar
+              <button
+                onClick={() => recuperar(imagen.id)}
+                className="btn btn-chico btn-secundario"
+                style={{ flex: 1 }}
+              >
+                <IconoRecuperar /> Recuperar
               </button>
               <button
                 onClick={() => abrirElegir(imagen)}
-                style={{ ...estiloBotonTarjeta, background: "var(--accent)", color: "#fff" }}
+                className="btn btn-chico btn-primario"
+                style={{ flex: 1 }}
               >
-                Elegir
+                <IconoElegir /> Elegir
               </button>
             </div>
           </div>
@@ -212,7 +214,7 @@ export default function GuardadasDescartadas() {
                     type="datetime-local"
                     value={paginasMarcadas.get(pagina.id)}
                     onChange={(evento) => ponerHoraPagina(pagina.id, evento.target.value)}
-                    style={estiloHoraProgramada}
+                    style={{ fontSize: 14 }}
                   />
                 )}
               </div>
@@ -220,29 +222,32 @@ export default function GuardadasDescartadas() {
 
             {aviso && (
               <div style={estiloAviso}>
-                <p>Ya salió en: {aviso.map((p) => p.nombre).join(", ")}. ¿Elegir de todas formas?</p>
-                <button onClick={() => confirmarElegir(true)} style={estiloBotonPequeno}>
+                <p style={{ margin: "0 0 8px" }}>
+                  Ya salió en: {aviso.map((p) => p.nombre).join(", ")}. ¿Elegir de todas formas?
+                </p>
+                <button
+                  onClick={() => confirmarElegir(true)}
+                  className="btn btn-chico btn-primario"
+                  style={{ width: "100%" }}
+                >
                   Sí, elegir igual
                 </button>
               </div>
             )}
 
-            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
               <button
                 onClick={() => setImagenEligiendo(null)}
-                style={{ ...estiloBotonPequeno, background: "var(--bg-suave)", color: "var(--text-h)" }}
+                className="btn btn-chico btn-secundario"
+                style={{ flex: 1 }}
               >
                 Cancelar
               </button>
               <button
                 onClick={() => confirmarElegir(false)}
                 disabled={paginasMarcadas.size === 0}
-                style={{
-                  ...estiloBotonPequeno,
-                  background: "var(--accent)",
-                  color: "#fff",
-                  ...(paginasMarcadas.size === 0 ? estiloBotonDeshabilitado : {}),
-                }}
+                className="btn btn-chico btn-primario"
+                style={{ flex: 1 }}
               >
                 Confirmar
               </button>
@@ -254,68 +259,25 @@ export default function GuardadasDescartadas() {
   );
 }
 
-function Pantalla({ children }) {
-  return (
-    <main
-      style={{
-        maxWidth: 480,
-        margin: "0 auto",
-        padding: "16px 16px 24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-      }}
-    >
-      {children}
-    </main>
-  );
-}
-
 const estiloPestanas = { display: "flex", gap: 8 };
-const estiloPestana = {
-  flex: 1,
-  padding: "10px 8px",
-  borderRadius: 8,
-  border: "1px solid var(--border)",
-  background: "var(--bg-suave)",
-  color: "var(--text)",
-  fontWeight: 600,
-  cursor: "pointer",
-};
-const estiloPestanaActiva = { background: "var(--accent)", color: "#fff", borderColor: "var(--accent)" };
-
-const estiloTarjeta = {
-  border: "1px solid var(--border)",
-  borderRadius: 12,
-  padding: 12,
-};
-
-const estiloBotonTarjeta = {
-  flex: 1,
-  padding: "10px 8px",
-  borderRadius: 8,
-  border: "none",
-  background: "var(--bg-suave)",
-  color: "var(--text-h)",
-  fontWeight: 600,
-  cursor: "pointer",
-};
 
 const estiloModal = {
   position: "fixed",
   inset: 0,
-  background: "rgba(0,0,0,0.5)",
+  background: "rgba(10,6,16,0.55)",
   display: "flex",
   alignItems: "flex-end",
   justifyContent: "center",
+  zIndex: 20,
 };
 
 const estiloModalContenido = {
   background: "var(--bg)",
   width: "100%",
   maxWidth: 480,
-  borderRadius: "16px 16px 0 0",
+  borderRadius: "20px 20px 0 0",
   padding: 20,
+  boxShadow: "var(--sombra-flotante)",
 };
 
 const estiloOpcionPagina = {
@@ -327,34 +289,10 @@ const estiloOpcionPagina = {
   borderBottom: "1px solid var(--border)",
 };
 
-const estiloHoraProgramada = {
-  font: "inherit",
-  fontSize: 14,
-  padding: "6px 8px",
-  borderRadius: 6,
-  border: "1px solid var(--border)",
-  background: "var(--bg-suave)",
-  color: "var(--text-h)",
-};
-
-const estiloBotonPequeno = {
-  flex: 1,
-  padding: "12px 8px",
-  borderRadius: 8,
-  border: "none",
-  fontWeight: 600,
-  cursor: "pointer",
-};
-
-const estiloBotonDeshabilitado = {
-  opacity: 0.45,
-  cursor: "not-allowed",
-};
-
 const estiloAviso = {
   marginTop: 12,
   padding: 12,
-  borderRadius: 8,
+  borderRadius: "var(--radio-chico)",
   background: "var(--error-bg)",
   color: "var(--error)",
 };

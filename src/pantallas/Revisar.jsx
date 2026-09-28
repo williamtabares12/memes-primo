@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import Pantalla from "../componentes/Pantalla.jsx";
+import {
+  IconoDescartar,
+  IconoElegir,
+  IconoGuardar,
+} from "../componentes/Iconos.jsx";
 
 // Pantalla Revisar (David, celular). Una imagen a la vez, con la
 // fuente arriba, el texto editable y tres botones grandes: Descartar,
@@ -136,7 +142,7 @@ export default function Revisar() {
       <Pantalla>
         <h1>Revisar</h1>
         <p>No hay imágenes nuevas por revisar.</p>
-        <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} style={estiloEnlace}>
+        <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} className="chip" style={{ alignSelf: "flex-start" }}>
           Ver guardadas y descartadas
         </Link>
       </Pantalla>
@@ -145,34 +151,36 @@ export default function Revisar() {
 
   return (
     <Pantalla>
-      <div style={estiloEncabezado}>
-        <div style={estiloContador}>Faltan {restantes} nuevas</div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} style={estiloEnlace}>
-            Guardadas y descartadas
+      <div className="barra-superior">
+        <div className="contador">Faltan {restantes} nuevas</div>
+        <div className="nav-enlaces">
+          <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} className="chip">
+            Guardadas
           </Link>
-          <Link to={`/armar?codigo=${encodeURIComponent(codigo)}`} style={estiloEnlace}>
+          <Link to={`/armar?codigo=${encodeURIComponent(codigo)}`} className="chip">
             Por armar
           </Link>
         </div>
       </div>
 
-      <p style={estiloFuente}>{imagen.fuente}</p>
+      <div className="tarjeta" style={{ padding: 10 }}>
+        <p style={estiloFuente}>{imagen.fuente}</p>
 
-      <img
-        src={imagen.url_ver}
-        alt="Imagen a revisar"
-        style={{ width: "100%", borderRadius: 12, border: "1px solid var(--border)" }}
-      />
+        <img
+          src={imagen.url_ver}
+          alt="Imagen a revisar"
+          style={{ width: "100%" }}
+        />
 
-      <textarea
-        value={texto}
-        onChange={(evento) => setTexto(evento.target.value)}
-        placeholder="Texto de la imagen (opcional)"
-        rows={3}
-        disabled={cargandoDecision}
-        style={estiloTextarea}
-      />
+        <textarea
+          value={texto}
+          onChange={(evento) => setTexto(evento.target.value)}
+          placeholder="Texto de la imagen (opcional)"
+          rows={3}
+          disabled={cargandoDecision}
+          style={{ width: "100%", marginTop: 10 }}
+        />
+      </div>
 
       {error && <p style={{ color: "var(--error)" }}>{error}</p>}
 
@@ -180,23 +188,23 @@ export default function Revisar() {
         <button
           onClick={() => enviarDecision("descartada")}
           disabled={cargandoDecision}
-          style={{ ...estiloBoton, background: "var(--error-bg)", color: "var(--error)" }}
+          className="btn btn-grande btn-peligro"
         >
-          Descartar
+          <IconoDescartar /> Descartar
         </button>
         <button
           onClick={() => enviarDecision("guardada")}
           disabled={cargandoDecision}
-          style={{ ...estiloBoton, background: "var(--bg-suave)", color: "var(--text-h)" }}
+          className="btn btn-grande btn-secundario"
         >
-          Guardar
+          <IconoGuardar /> Guardar
         </button>
         <button
           onClick={() => setMostrarPaginas(true)}
           disabled={cargandoDecision}
-          style={{ ...estiloBoton, background: "var(--accent)", color: "#fff" }}
+          className="btn btn-grande btn-primario"
         >
-          Elegir
+          <IconoElegir /> Elegir
         </button>
       </div>
 
@@ -220,7 +228,7 @@ export default function Revisar() {
                     type="datetime-local"
                     value={paginasMarcadas.get(pagina.id)}
                     onChange={(evento) => ponerHoraPagina(pagina.id, evento.target.value)}
-                    style={estiloHoraProgramada}
+                    style={{ fontSize: 14 }}
                   />
                 )}
               </div>
@@ -228,37 +236,36 @@ export default function Revisar() {
 
             {aviso && (
               <div style={estiloAviso}>
-                <p>
+                <p style={{ margin: "0 0 8px" }}>
                   Ya salió en: {aviso.map((p) => p.nombre).join(", ")}. ¿Elegir de todas
                   formas?
                 </p>
-                <button onClick={() => confirmarElegir(true)} style={estiloBotonPequeno}>
+                <button
+                  onClick={() => confirmarElegir(true)}
+                  className="btn btn-chico btn-primario"
+                  style={{ width: "100%" }}
+                >
                   Sí, elegir igual
                 </button>
               </div>
             )}
 
-            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
               <button
                 onClick={() => {
                   setMostrarPaginas(false);
                   setAviso(null);
                 }}
-                style={{ ...estiloBotonPequeno, background: "var(--bg-suave)", color: "var(--text-h)" }}
+                className="btn btn-chico btn-secundario"
+                style={{ flex: 1 }}
               >
                 Cancelar
               </button>
               <button
                 onClick={() => confirmarElegir(false)}
                 disabled={paginasMarcadas.size === 0 || cargandoDecision}
-                style={{
-                  ...estiloBotonPequeno,
-                  background: "var(--accent)",
-                  color: "#fff",
-                  ...(paginasMarcadas.size === 0 || cargandoDecision
-                    ? estiloBotonDeshabilitado
-                    : {}),
-                }}
+                className="btn btn-chico btn-primario"
+                style={{ flex: 1 }}
               >
                 Confirmar
               </button>
@@ -270,101 +277,36 @@ export default function Revisar() {
   );
 }
 
-function Pantalla({ children }) {
-  return (
-    <main
-      style={{
-        maxWidth: 480,
-        margin: "0 auto",
-        padding: "16px 16px 24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-      }}
-    >
-      {children}
-    </main>
-  );
-}
-
-const estiloEncabezado = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 8,
-};
-
-const estiloContador = {
-  fontSize: 14,
-  padding: "4px 12px",
-  borderRadius: 999,
-  background: "var(--bg-suave)",
-  color: "var(--text)",
-  whiteSpace: "nowrap",
-};
-
-const estiloEnlace = {
-  fontSize: 13,
-  color: "var(--accent)",
-  textDecoration: "none",
-};
-
 const estiloFuente = {
-  fontWeight: 600,
+  fontWeight: 700,
   color: "var(--text-h)",
-  margin: 0,
-};
-
-const estiloTextarea = {
-  font: "inherit",
-  padding: 10,
-  borderRadius: 8,
-  border: "1px solid var(--border)",
-  background: "var(--bg-suave)",
-  color: "var(--text-h)",
-  resize: "vertical",
+  margin: "0 0 8px",
+  fontSize: 14,
+  opacity: 0.85,
 };
 
 const estiloBotones = {
   display: "flex",
   gap: 8,
-  marginTop: 8,
-};
-
-const estiloBoton = {
-  flex: 1,
-  padding: "16px 8px",
-  borderRadius: 10,
-  border: "none",
-  fontWeight: 600,
-  fontSize: 15,
-  cursor: "pointer",
-};
-
-const estiloBotonPequeno = {
-  flex: 1,
-  padding: "12px 8px",
-  borderRadius: 8,
-  border: "none",
-  fontWeight: 600,
-  cursor: "pointer",
 };
 
 const estiloModal = {
   position: "fixed",
   inset: 0,
-  background: "rgba(0,0,0,0.5)",
+  background: "rgba(10,6,16,0.55)",
   display: "flex",
   alignItems: "flex-end",
   justifyContent: "center",
+  zIndex: 20,
 };
 
 const estiloModalContenido = {
   background: "var(--bg)",
   width: "100%",
   maxWidth: 480,
-  borderRadius: "16px 16px 0 0",
+  borderRadius: "20px 20px 0 0",
   padding: 20,
+  boxShadow: "var(--sombra-flotante)",
 };
 
 const estiloOpcionPagina = {
@@ -376,25 +318,10 @@ const estiloOpcionPagina = {
   borderBottom: "1px solid var(--border)",
 };
 
-const estiloHoraProgramada = {
-  font: "inherit",
-  fontSize: 14,
-  padding: "6px 8px",
-  borderRadius: 6,
-  border: "1px solid var(--border)",
-  background: "var(--bg-suave)",
-  color: "var(--text-h)",
-};
-
-const estiloBotonDeshabilitado = {
-  opacity: 0.45,
-  cursor: "not-allowed",
-};
-
 const estiloAviso = {
   marginTop: 12,
   padding: 12,
-  borderRadius: 8,
+  borderRadius: "var(--radio-chico)",
   background: "var(--error-bg)",
   color: "var(--error)",
 };
