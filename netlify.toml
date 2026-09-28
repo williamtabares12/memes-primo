@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[dev]
+  command = "npm run dev"
+  targetPort = 5173
+  port = 8888
+  autoLaunch = false
+
+# La función de limpieza corre todos los días a las 8:00 UTC
+# (3:00 a.m. hora de Colombia). Ver docs/plan-tecnico.md.
+[functions."limpieza-diaria"]
+  schedule = "0 8 * * *"
