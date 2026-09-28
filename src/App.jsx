@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SubirLote from "./pantallas/SubirLote.jsx";
+import Revisar from "./pantallas/Revisar.jsx";
 
 // Cada persona entra con su propio enlace privado, algo como:
 //   /subir?codigo=<LINK_CODE_ALEJANDRO>
@@ -23,6 +24,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Inicio />} />
         <Route path="/subir" element={<SubirLote />} />
+        <Route path="/revisar" element={<Revisar />} />
       </Routes>
     </BrowserRouter>
   );
