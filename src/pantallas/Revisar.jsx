@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 // Pantalla Revisar (David, celular). Una imagen a la vez, con la
 // fuente arriba, el texto editable y tres botones grandes: Descartar,
@@ -128,14 +128,22 @@ export default function Revisar() {
     return (
       <Pantalla>
         <h1>Revisar</h1>
-        <p>No hay imágenes nuevas por revisar. 🎉</p>
+        <p>No hay imágenes nuevas por revisar.</p>
+        <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} style={estiloEnlace}>
+          Ver guardadas y descartadas
+        </Link>
       </Pantalla>
     );
   }
 
   return (
     <Pantalla>
-      <div style={estiloContador}>Faltan {restantes} nuevas</div>
+      <div style={estiloEncabezado}>
+        <div style={estiloContador}>Faltan {restantes} nuevas</div>
+        <Link to={`/guardadas?codigo=${encodeURIComponent(codigo)}`} style={estiloEnlace}>
+          Guardadas y descartadas
+        </Link>
+      </div>
 
       <p style={estiloFuente}>{imagen.fuente}</p>
 
@@ -250,13 +258,26 @@ function Pantalla({ children }) {
   );
 }
 
+const estiloEncabezado = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 8,
+};
+
 const estiloContador = {
-  alignSelf: "center",
   fontSize: 14,
   padding: "4px 12px",
   borderRadius: 999,
   background: "var(--bg-suave)",
   color: "var(--text)",
+  whiteSpace: "nowrap",
+};
+
+const estiloEnlace = {
+  fontSize: 13,
+  color: "var(--accent)",
+  textDecoration: "none",
 };
 
 const estiloFuente = {

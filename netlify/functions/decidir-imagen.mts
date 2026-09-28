@@ -57,7 +57,7 @@ export default async (req: Request) => {
   const db = clienteDb();
 
   // Trae la imagen actual (para el texto, si no viene uno nuevo, y
-  // para validar que sigue en estado "nueva").
+  // para validar desde qué estado se puede pasar a "decision").
   const { data: imagenActual, error: errorLectura } = await db
     .from("imagenes")
     .select("id, texto, estado")
@@ -67,7 +67,13 @@ export default async (req: Request) => {
   if (errorLectura || !imagenActual) {
     return respuestaError("La imagen no existe.", 404);
   }
-  if (imagenActual.estado !== "nueva") {
+
+  // Guardar y Descartar solo aplican a una imagen Nueva (H3). Elegir
+  // aplica desde Nueva, Guardada o Descartada (H5: "Cada tarjeta
+  // permite elegir o recuperar").
+  const estadosOrigenPermitidos =
+    decision === "elegida" ? ["nueva", "guardada", "descartada"] : ["nueva"];
+  if (!estadosOrigenPermitidos.includes(imagenActual.estado)) {
     return respuestaError("Esta imagen ya fue decidida.", 409);
   }
 
@@ -146,7 +152,7 @@ export default async (req: Request) => {
       fecha_caducidad: null,
     })
     .eq("id", imagen_id)
-    .eq("estado", "nueva");
+    .in("estado", estadosOrigenPermitidos);
 
   if (errorUpdate) return respuestaError(errorUpdate.message, 500);
 
