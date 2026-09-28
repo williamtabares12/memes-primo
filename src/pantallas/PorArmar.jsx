@@ -9,6 +9,7 @@ import {
   IconoImagen,
   IconoReloj,
 } from "../componentes/Iconos.jsx";
+import { ZONA_BOGOTA } from "../componentes/horasFijas.js";
 
 // Pantalla Por armar (H2, H6, H10). La ven Alejandro y David: lista
 // de imágenes Elegidas o Armadas con páginas pendientes. Cada fila
@@ -245,6 +246,7 @@ function TarjetaPorArmar({
                   {new Date(p.hora_programada).toLocaleString("es-CO", {
                     dateStyle: "short",
                     timeStyle: "short",
+                    timeZone: ZONA_BOGOTA,
                   })}
                 </div>
               )}

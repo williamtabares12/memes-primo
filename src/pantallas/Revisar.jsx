@@ -4,6 +4,7 @@ import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import SelectorHoraProgramada from "../componentes/SelectorHoraProgramada.jsx";
 import AvisoDeshacer from "../componentes/AvisoDeshacer.jsx";
+import { horaProgramadaISO } from "../componentes/horasFijas.js";
 import {
   IconoDescartar,
   IconoElegir,
@@ -208,7 +209,7 @@ export default function Revisar() {
   function confirmarElegir(confirmarRepetidas = false) {
     const paginas = Array.from(paginasMarcadas, ([id, { fecha, hora }]) => ({
       id,
-      hora_programada: new Date(`${fecha}T${hora}:00`).toISOString(),
+      hora_programada: horaProgramadaISO(fecha, hora),
     }));
     enviarDecision("elegida", { paginas, confirmar_repetidas: confirmarRepetidas });
   }

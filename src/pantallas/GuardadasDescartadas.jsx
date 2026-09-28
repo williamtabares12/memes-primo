@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import SelectorHoraProgramada from "../componentes/SelectorHoraProgramada.jsx";
+import { horaProgramadaISO } from "../componentes/horasFijas.js";
 import { IconoElegir, IconoRecuperar } from "../componentes/Iconos.jsx";
 
 // Pantalla Guardadas y descartadas (David, H5). Dos pilas en pestañas;
@@ -97,7 +98,7 @@ export default function GuardadasDescartadas() {
   async function confirmarElegir(confirmarRepetidas = false) {
     const paginas = Array.from(paginasMarcadas, ([id, { fecha, hora }]) => ({
       id,
-      hora_programada: new Date(`${fecha}T${hora}:00`).toISOString(),
+      hora_programada: horaProgramadaISO(fecha, hora),
     }));
     const respuesta = await fetch("/.netlify/functions/decidir-imagen", {
       method: "POST",
