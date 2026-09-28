@@ -1,8 +1,11 @@
 // POST /.netlify/functions/decidir-imagen
-// Body: { codigo, imagen_id, decision, texto?, paginas_ids?, confirmar_repetidas? }
+// Body: { codigo, imagen_id, decision, texto?, paginas?, confirmar_repetidas? }
 //
 // decision es "guardada", "descartada" o "elegida" (H3, H4, H5).
-// Para "elegida" hace falta paginas_ids con al menos una página.
+// Para "elegida" hace falta paginas: [{ id, hora_programada? }] con
+// al menos una página. hora_programada es opcional y por página
+// (pedido de David: puede postear la misma imagen a horas distintas
+// en cada página), ISO 8601 o null.
 //
 // H8: si el texto de esta imagen coincide con el de otra imagen que
 // ya está Publicada en alguna de las páginas marcadas, la respuesta
@@ -17,6 +20,11 @@ import { identificarUsuario, respuestaNoAutorizado } from "./_lib/auth.mts";
 import { clienteDb } from "./_lib/db.mts";
 
 const DIAS_CADUCIDAD = 30;
+
+interface PaginaElegida {
+  id: string;
+  hora_programada?: string | null;
+}
 
 function respuestaError(mensaje: string, status = 400): Response {
   return new Response(JSON.stringify({ error: mensaje }), {
@@ -33,7 +41,7 @@ export default async (req: Request) => {
     imagen_id?: string;
     decision?: "guardada" | "descartada" | "elegida";
     texto?: string;
-    paginas_ids?: string[];
+    paginas?: PaginaElegida[];
     confirmar_repetidas?: boolean;
   };
   try {
@@ -103,10 +111,11 @@ export default async (req: Request) => {
   }
 
   // decision === "elegida"
-  const paginasIds = cuerpo.paginas_ids;
-  if (!Array.isArray(paginasIds) || paginasIds.length === 0) {
+  const paginasElegidas = cuerpo.paginas;
+  if (!Array.isArray(paginasElegidas) || paginasElegidas.length === 0) {
     return respuestaError("Elegir necesita al menos una página marcada.");
   }
+  const paginasIds = paginasElegidas.map((pagina) => pagina.id);
 
   if (textoFinal && textoFinal.trim() && !cuerpo.confirmar_repetidas) {
     const textoNormalizado = textoFinal.trim().toLowerCase();
@@ -157,10 +166,11 @@ export default async (req: Request) => {
   if (errorUpdate) return respuestaError(errorUpdate.message, 500);
 
   const { error: errorPublicaciones } = await db.from("publicaciones").insert(
-    paginasIds.map((pagina_id) => ({
+    paginasElegidas.map((pagina) => ({
       imagen_id,
-      pagina_id,
+      pagina_id: pagina.id,
       publicada: false,
+      hora_programada: pagina.hora_programada || null,
     }))
   );
 

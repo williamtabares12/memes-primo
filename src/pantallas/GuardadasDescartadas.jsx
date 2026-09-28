@@ -21,7 +21,7 @@ export default function GuardadasDescartadas() {
   const [error, setError] = useState("");
 
   const [imagenEligiendo, setImagenEligiendo] = useState(null);
-  const [paginasMarcadas, setPaginasMarcadas] = useState(new Set());
+  const [paginasMarcadas, setPaginasMarcadas] = useState(new Map());
   const [aviso, setAviso] = useState(null);
 
   const cargarLista = useCallback(async () => {
@@ -66,20 +66,28 @@ export default function GuardadasDescartadas() {
 
   function abrirElegir(imagen) {
     setImagenEligiendo(imagen);
-    setPaginasMarcadas(new Set());
+    setPaginasMarcadas(new Map());
     setAviso(null);
   }
 
   function alternarPagina(id) {
     setPaginasMarcadas((previo) => {
-      const nuevo = new Set(previo);
+      const nuevo = new Map(previo);
       if (nuevo.has(id)) nuevo.delete(id);
-      else nuevo.add(id);
+      else nuevo.set(id, "");
       return nuevo;
     });
   }
 
+  function ponerHoraPagina(id, valorDatetimeLocal) {
+    setPaginasMarcadas((previo) => new Map(previo).set(id, valorDatetimeLocal));
+  }
+
   async function confirmarElegir(confirmarRepetidas = false) {
+    const paginas = Array.from(paginasMarcadas, ([id, hora]) => ({
+      id,
+      hora_programada: hora ? new Date(hora).toISOString() : null,
+    }));
     const respuesta = await fetch("/.netlify/functions/decidir-imagen", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -88,7 +96,7 @@ export default function GuardadasDescartadas() {
         imagen_id: imagenEligiendo.id,
         decision: "elegida",
         texto: imagenEligiendo.texto,
-        paginas_ids: Array.from(paginasMarcadas),
+        paginas,
         confirmar_repetidas: confirmarRepetidas,
       }),
     });
@@ -190,14 +198,24 @@ export default function GuardadasDescartadas() {
           <div style={estiloModalContenido}>
             <h2>¿Para qué páginas?</h2>
             {paginas.map((pagina) => (
-              <label key={pagina.id} style={estiloOpcionPagina}>
-                <input
-                  type="checkbox"
-                  checked={paginasMarcadas.has(pagina.id)}
-                  onChange={() => alternarPagina(pagina.id)}
-                />
-                {pagina.nombre}
-              </label>
+              <div key={pagina.id} style={estiloOpcionPagina}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
+                  <input
+                    type="checkbox"
+                    checked={paginasMarcadas.has(pagina.id)}
+                    onChange={() => alternarPagina(pagina.id)}
+                  />
+                  {pagina.nombre}
+                </label>
+                {paginasMarcadas.has(pagina.id) && (
+                  <input
+                    type="datetime-local"
+                    value={paginasMarcadas.get(pagina.id)}
+                    onChange={(evento) => ponerHoraPagina(pagina.id, evento.target.value)}
+                    style={estiloHoraProgramada}
+                  />
+                )}
+              </div>
             ))}
 
             {aviso && (
@@ -298,9 +316,20 @@ const estiloModalContenido = {
 const estiloOpcionPagina = {
   display: "flex",
   alignItems: "center",
+  flexWrap: "wrap",
   gap: 8,
   padding: "10px 0",
   borderBottom: "1px solid var(--border)",
+};
+
+const estiloHoraProgramada = {
+  font: "inherit",
+  fontSize: 14,
+  padding: "6px 8px",
+  borderRadius: 6,
+  border: "1px solid var(--border)",
+  background: "var(--bg-suave)",
+  color: "var(--text-h)",
 };
 
 const estiloBotonPequeno = {
