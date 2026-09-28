@@ -2,10 +2,11 @@
 // Body: { codigo, imagen_id, decision, texto?, paginas?, confirmar_repetidas? }
 //
 // decision es "guardada", "descartada" o "elegida" (H3, H4, H5).
-// Para "elegida" hace falta paginas: [{ id, hora_programada? }] con
-// al menos una página. hora_programada es opcional y por página
+// Para "elegida" hace falta paginas: [{ id, hora_programada }] con
+// al menos una página. hora_programada es obligatoria y por página
 // (pedido de David: puede postear la misma imagen a horas distintas
-// en cada página), ISO 8601 o null.
+// en cada página, y nunca sin hora para no terminar con horas al
+// azar), en ISO 8601.
 //
 // H8: si el texto de esta imagen coincide con el de otra imagen que
 // ya está Publicada en alguna de las páginas marcadas, la respuesta
@@ -23,7 +24,7 @@ const DIAS_CADUCIDAD = 30;
 
 interface PaginaElegida {
   id: string;
-  hora_programada?: string | null;
+  hora_programada: string;
 }
 
 function respuestaError(mensaje: string, status = 400): Response {
@@ -115,6 +116,12 @@ export default async (req: Request) => {
   if (!Array.isArray(paginasElegidas) || paginasElegidas.length === 0) {
     return respuestaError("Elegir necesita al menos una página marcada.");
   }
+  // Pedido de David: la hora programada es obligatoria por página (el
+  // frontend ya lo exige con un selector de horas fijas; esto es el
+  // respaldo del lado del servidor).
+  if (paginasElegidas.some((pagina) => !pagina.hora_programada)) {
+    return respuestaError("Cada página necesita su hora programada.");
+  }
   const paginasIds = paginasElegidas.map((pagina) => pagina.id);
 
   if (textoFinal && textoFinal.trim() && !cuerpo.confirmar_repetidas) {
@@ -170,7 +177,7 @@ export default async (req: Request) => {
       imagen_id,
       pagina_id: pagina.id,
       publicada: false,
-      hora_programada: pagina.hora_programada || null,
+      hora_programada: pagina.hora_programada,
     }))
   );
 

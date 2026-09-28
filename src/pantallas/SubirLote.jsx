@@ -16,6 +16,8 @@ const ESTADO_SUBIENDO = "subiendo";
 const ESTADO_TERMINADO = "terminado";
 const ESTADO_ENLACE_INVALIDO = "enlace_invalido";
 
+const FUENTES = ["Guarromantico", "ZonaFarandula-Cosquilla"];
+
 export default function SubirLote() {
   const [searchParams] = useSearchParams();
   const codigo = searchParams.get("codigo");
@@ -201,13 +203,20 @@ export default function SubirLote() {
 
       <label className="campo">
         Fuente
-        <input
-          type="text"
+        <select
           value={fuente}
           onChange={(evento) => setFuente(evento.target.value)}
-          placeholder="Ej. Cosquilla-Zona Farándula"
           disabled={subiendo}
-        />
+        >
+          <option value="" disabled>
+            Elige una fuente
+          </option>
+          {FUENTES.map((f) => (
+            <option key={f} value={f}>
+              {f}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className="campo">
@@ -241,7 +250,7 @@ export default function SubirLote() {
 
       {!subiendo && (!fuente.trim() || archivos.length === 0) && (
         <p style={{ color: "var(--text)", fontSize: 13, opacity: 0.75, margin: 0 }}>
-          {!fuente.trim() && "Escribe la fuente"}
+          {!fuente.trim() && "Elige la fuente"}
           {!fuente.trim() && archivos.length === 0 && " y elige las imágenes"}
           {fuente.trim() && archivos.length === 0 && "Elige las imágenes"}
           {" para poder subir."}

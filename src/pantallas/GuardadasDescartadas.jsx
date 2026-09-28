@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
+import SelectorHoraProgramada from "../componentes/SelectorHoraProgramada.jsx";
 import { IconoElegir, IconoRecuperar } from "../componentes/Iconos.jsx";
 
 // Pantalla Guardadas y descartadas (David, H5). Dos pilas en pestañas;
@@ -77,19 +78,26 @@ export default function GuardadasDescartadas() {
     setPaginasMarcadas((previo) => {
       const nuevo = new Map(previo);
       if (nuevo.has(id)) nuevo.delete(id);
-      else nuevo.set(id, "");
+      else nuevo.set(id, { fecha: "", hora: "" });
       return nuevo;
     });
   }
 
-  function ponerHoraPagina(id, valorDatetimeLocal) {
-    setPaginasMarcadas((previo) => new Map(previo).set(id, valorDatetimeLocal));
+  function ponerHoraPagina(id, valor) {
+    setPaginasMarcadas((previo) => new Map(previo).set(id, valor));
   }
 
+  // Obligatorio: cada página marcada necesita fecha y hora antes de
+  // poder confirmar (pedido de David, para no terminar con horas al
+  // azar sin querer).
+  const faltaHoraProgramada =
+    paginasMarcadas.size === 0 ||
+    Array.from(paginasMarcadas.values()).some((v) => !v.fecha || !v.hora);
+
   async function confirmarElegir(confirmarRepetidas = false) {
-    const paginas = Array.from(paginasMarcadas, ([id, hora]) => ({
+    const paginas = Array.from(paginasMarcadas, ([id, { fecha, hora }]) => ({
       id,
-      hora_programada: hora ? new Date(hora).toISOString() : null,
+      hora_programada: new Date(`${fecha}T${hora}:00`).toISOString(),
     }));
     const respuesta = await fetch("/.netlify/functions/decidir-imagen", {
       method: "POST",
@@ -195,6 +203,9 @@ export default function GuardadasDescartadas() {
         <div style={estiloModal}>
           <div style={estiloModalContenido}>
             <h2>¿Para qué páginas?</h2>
+            <p style={{ fontSize: 13, opacity: 0.75, marginTop: -6 }}>
+              La hora programada es obligatoria para cada página que marques.
+            </p>
             {paginas.map((pagina) => (
               <div key={pagina.id} style={estiloOpcionPagina}>
                 <label style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
@@ -206,11 +217,9 @@ export default function GuardadasDescartadas() {
                   {pagina.nombre}
                 </label>
                 {paginasMarcadas.has(pagina.id) && (
-                  <input
-                    type="datetime-local"
-                    value={paginasMarcadas.get(pagina.id)}
-                    onChange={(evento) => ponerHoraPagina(pagina.id, evento.target.value)}
-                    style={{ fontSize: 14 }}
+                  <SelectorHoraProgramada
+                    valor={paginasMarcadas.get(pagina.id)}
+                    onCambiar={(valor) => ponerHoraPagina(pagina.id, valor)}
                   />
                 )}
               </div>
@@ -241,7 +250,7 @@ export default function GuardadasDescartadas() {
               </button>
               <button
                 onClick={() => confirmarElegir(false)}
-                disabled={paginasMarcadas.size === 0}
+                disabled={faltaHoraProgramada}
                 className="btn btn-chico btn-primario"
                 style={{ flex: 1 }}
               >
