@@ -4,6 +4,7 @@ import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import { IconoCheck, IconoCopiar, IconoReloj } from "../componentes/Iconos.jsx";
 import { ZONA_BOGOTA } from "../componentes/horasFijas.js";
+import PrepararImagen from "../componentes/PrepararImagen.jsx";
 
 // Pantalla Por armar (H2, H6, H10). La ven Alejandro y David: lista
 // de imágenes Elegidas o Armadas con páginas pendientes. Cada fila
@@ -239,6 +240,9 @@ function TarjetaPorArmar({
           <button onClick={onMarcarArmada} className="btn btn-chico btn-primario">
             Armada
           </button>
+        )}
+        {usuario === "alejandro" && (
+          <PrepararImagen nombreArchivo={`meme-${pieza.id.slice(0, 8)}`} />
         )}
       </div>
     </div>
