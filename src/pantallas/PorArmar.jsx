@@ -73,7 +73,10 @@ export default function PorArmar() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ codigo, imagen_id: imagenId }),
     });
-    if (!respuesta.ok) {
+    // 409 = la pieza ya no existe o ya estaba quitada: da igual, el
+    // resultado que se buscaba (que no aparezca acá) ya se cumple,
+    // así que no hace falta mostrar error, solo sacarla de la vista.
+    if (!respuesta.ok && respuesta.status !== 409) {
       const datos = await respuesta.json().catch(() => ({}));
       setError(datos.error ?? "No se pudo quitar de la lista.");
       return;

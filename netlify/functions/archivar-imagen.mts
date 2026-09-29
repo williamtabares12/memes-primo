@@ -35,15 +35,19 @@ export default async (req: Request) => {
   if (!cuerpo.imagen_id) return respuestaError("Falta imagen_id.");
 
   const db = clienteDb();
+  // Solo exige que el id exista: el objetivo es "que ya no aparezca
+  // en Por armar", no que siga en un estado exacto. Exigir
+  // estado='elegida' acá no aportaba nada (imagenes-por-armar ya
+  // filtra por elegida+archivada=false) y sí podía fallar sin razón
+  // aparente, así que se saca esa condición extra.
   const { error, count } = await db
     .from("imagenes")
     .update({ archivada: true })
     .eq("id", cuerpo.imagen_id)
-    .eq("estado", "elegida")
     .select("id", { count: "exact" });
 
   if (error) return respuestaError(error.message, 500);
-  if (!count) return respuestaError("Esa pieza ya no está en Por armar.", 409);
+  if (!count) return respuestaError("Esa pieza ya no existe.", 409);
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
