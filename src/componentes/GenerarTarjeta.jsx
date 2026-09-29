@@ -10,15 +10,22 @@ import { IconoDescargar, IconoImagen } from "./Iconos.jsx";
 // navegador, no se sube a ningún servidor ni se guarda en la base de
 // datos.
 
+// Medidas calibradas contra un pantallazo real de X (no aproximadas):
+// avatar, letras y espacios en la misma proporción que el original,
+// para que la tarjeta no salga más "chica"/alejada que el pantallazo
+// real que reemplaza.
 const LADO_CANVAS = 1080;
 const ANCHO_CONTENIDO = 1000;
-const PADDING = 44;
-const AVATAR_DIAM = 96;
-const ALTO_LINEA_TEXTO = 58;
+const PADDING = 26;
+const AVATAR_DIAM = 133;
+const GAP_AVATAR_NOMBRE_X = 26; // espacio horizontal entre el avatar y el nombre
+const GAP_ENCABEZADO_TEXTO = 114; // espacio vertical entre el avatar y la primera línea del tuit
+const USUARIO_OFFSET_Y = 77; // dónde cae el @usuario, medido desde arriba del avatar
+const ALTO_LINEA_TEXTO = 86;
 
-const FUENTE_NOMBRE = "700 42px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-const FUENTE_USUARIO = "36px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-const FUENTE_TEXTO = "44px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const FUENTE_NOMBRE = "700 62px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const FUENTE_USUARIO = "53px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const FUENTE_TEXTO = "65px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 function envolverTexto(ctx, texto, maxAncho) {
   if (texto.trim() === "") return [""];
@@ -87,10 +94,10 @@ export default function GenerarTarjeta({ texto, nombreTuit, usuarioTuit, avatarU
       lineas.push(...envolverTexto(medidor, parrafo, maxAnchoTexto));
     });
 
-    const anchoHeaderTexto = ANCHO_CONTENIDO - PADDING - (PADDING + AVATAR_DIAM + 20);
+    const anchoHeaderTexto = ANCHO_CONTENIDO - PADDING - (PADDING + AVATAR_DIAM + GAP_AVATAR_NOMBRE_X);
     const nombreCorto = medidor.measureText(nombreTuit || "").width > anchoHeaderTexto;
 
-    const altoHeader = PADDING + AVATAR_DIAM + 36;
+    const altoHeader = PADDING + AVATAR_DIAM + GAP_ENCABEZADO_TEXTO;
     const altoTexto = lineas.length * ALTO_LINEA_TEXTO;
     const altoContenido = altoHeader + altoTexto + PADDING;
 
@@ -118,14 +125,14 @@ export default function GenerarTarjeta({ texto, nombreTuit, usuarioTuit, avatarU
       cctx.fill();
     }
 
-    const textoHeaderX = PADDING + AVATAR_DIAM + 20;
+    const textoHeaderX = PADDING + AVATAR_DIAM + GAP_AVATAR_NOMBRE_X;
     cctx.textBaseline = "top";
     cctx.fillStyle = "#0f1419";
     cctx.font = FUENTE_NOMBRE;
-    cctx.fillText(nombreTuit || "", textoHeaderX, PADDING - 2, nombreCorto ? anchoHeaderTexto : undefined);
+    cctx.fillText(nombreTuit || "", textoHeaderX, PADDING, nombreCorto ? anchoHeaderTexto : undefined);
     cctx.fillStyle = "#536471";
     cctx.font = FUENTE_USUARIO;
-    cctx.fillText(usuarioTuit || "", textoHeaderX, PADDING + 48);
+    cctx.fillText(usuarioTuit || "", textoHeaderX, PADDING + USUARIO_OFFSET_Y);
 
     cctx.fillStyle = "#0f1419";
     cctx.font = FUENTE_TEXTO;
