@@ -6,6 +6,10 @@ import {
   IconoSubir,
 } from "./Iconos.jsx";
 
+// Preselección reutiliza el ícono de "Elegir": ambas pantallas son
+// "decidir sí/no sobre una imagen", solo que en momentos distintos
+// del flujo.
+
 // Barra de navegación fija abajo, como en una app de celular, para
 // no depender de que cada quien recuerde/escriba la URL de cada
 // pantalla. Las pestañas dependen del usuario: Alejandro sube y
@@ -14,6 +18,7 @@ import {
 const PESTANAS_POR_USUARIO = {
   alejandro: [
     { ruta: "/subir", etiqueta: "Subir", Icono: IconoSubir },
+    { ruta: "/preseleccion", etiqueta: "Preselección", Icono: IconoElegir },
     { ruta: "/armar", etiqueta: "Por armar", Icono: IconoLista },
   ],
   david: [

@@ -31,14 +31,19 @@ export default async (req: Request) => {
 
   // Con !inner el filtro por fuente (columna de lotes) sí recorta las
   // filas de imagenes devueltas, no solo el contenido embebido.
+  // pendiente_triage=false: lo que importa el importador de Reddit
+  // entra escondido hasta que Alejandro lo apruebe en /preseleccion
+  // (ver triage-imagen.mts), así que acá nunca debe aparecer.
   let consultaConteo = db
     .from("imagenes")
     .select("id, lote:lotes!inner(fuente)", { count: "exact", head: true })
-    .eq("estado", "nueva");
+    .eq("estado", "nueva")
+    .eq("pendiente_triage", false);
   let consultaSiguiente = db
     .from("imagenes")
     .select("id, ruta_archivo, texto, lote:lotes!inner(fuente)")
     .eq("estado", "nueva")
+    .eq("pendiente_triage", false)
     .order("creada_en", { ascending: true })
     .limit(1);
 

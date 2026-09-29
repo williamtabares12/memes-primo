@@ -1,15 +1,15 @@
 // Función programada en segundo plano (ver "config" al final; corre
 // una vez al día sola, nadie la llama a mano). Reemplaza una parte
 // del scrolleo manual de Alejandro por Facebook: trae los memes en
-// español más votados del día en un puñado de subreddits, y los deja
-// como lote "nueva" para que David los revise exactamente igual que
-// los que Alejandro sube a mano en Subir lote. No toca Facebook ni
-// X para nada, y no usa ninguna cuenta personal: es la API oficial
-// de Reddit, en modo lectura de contenido público (ver _lib/reddit.mts).
+// español más votados del día en un puñado de subreddits. No toca
+// Facebook ni X para nada, y no usa ninguna cuenta personal: es la
+// API oficial de Reddit, en modo lectura de contenido público (ver
+// _lib/reddit.mts).
 //
-// Sigue siendo trabajo de David/Alejandro decidir cuáles de estos
-// sirven: esto solo reemplaza el "scrollear y guardar 100 en bruto",
-// no el criterio de qué es "suficientemente viral" para Colombia.
+// Entra con pendiente_triage=true, o sea que David NO lo ve en
+// Revisar todavía: primero pasa por /preseleccion (solo Alejandro),
+// que decide qué se manda a Revisar y qué no. Ver
+// triage-imagen.mts para ese paso.
 //
 // Lista de subreddits: es un punto de partida razonable (memes en
 // español con volumen alto), no una decisión final. Si después de
@@ -136,6 +136,7 @@ export default async (req: Request) => {
         texto: post.titulo,
         estado: "nueva",
         origen_externo: `reddit:${post.id}`,
+        pendiente_triage: true,
       });
 
       if (errorImagen) {
