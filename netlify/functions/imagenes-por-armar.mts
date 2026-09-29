@@ -2,9 +2,9 @@
 //
 // Pantalla Por armar (H2, H6, H10). Trae las imágenes Elegidas o
 // Armadas que todavía tienen alguna página sin Publicar, con sus
-// páginas, la hora programada de cada una (pedido de David) y la
-// captura si ya la subieron. La ven tanto Alejandro como David.
-// pagina_id es opcional (H6: "filtro por página").
+// páginas y la hora programada de cada una (pedido de David). La ven
+// tanto Alejandro como David. pagina_id es opcional (H6: "filtro por
+// página").
 
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -27,7 +27,7 @@ export default async (req: Request) => {
   let consulta = db
     .from("imagenes")
     .select(
-      `id, texto, estado, ruta_archivo, ruta_captura,
+      `id, texto, estado, ruta_archivo,
        lote:lotes(fuente),
        publicaciones(id, publicada, marcada_por, fecha_publicacion, hora_programada,
          pagina:paginas(id, nombre))`
@@ -67,13 +67,6 @@ export default async (req: Request) => {
           new GetObjectCommand({ Bucket: bucket, Key: fila.ruta_archivo }),
           { expiresIn: SEGUNDOS_VALIDEZ_URL }
         );
-        const url_captura = fila.ruta_captura
-          ? await getSignedUrl(
-              r2,
-              new GetObjectCommand({ Bucket: bucket, Key: fila.ruta_captura }),
-              { expiresIn: SEGUNDOS_VALIDEZ_URL }
-            )
-          : null;
 
         return {
           id: fila.id,
@@ -81,7 +74,6 @@ export default async (req: Request) => {
           fuente: lote?.fuente ?? "",
           estado: fila.estado,
           url_ver,
-          url_captura,
           publicaciones: fila.publicaciones.map((p) => {
             const pagina = Array.isArray(p.pagina) ? p.pagina[0] : p.pagina;
             return {

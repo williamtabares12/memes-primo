@@ -1,20 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
-import {
-  IconoCheck,
-  IconoCopiar,
-  IconoDescargar,
-  IconoImagen,
-  IconoReloj,
-} from "../componentes/Iconos.jsx";
+import { IconoCheck, IconoCopiar, IconoReloj } from "../componentes/Iconos.jsx";
 import { ZONA_BOGOTA } from "../componentes/horasFijas.js";
 
 // Pantalla Por armar (H2, H6, H10). La ven Alejandro y David: lista
 // de imágenes Elegidas o Armadas con páginas pendientes. Cada fila
 // trae el texto (editable, con copiar), la hora programada por
-// página, el botón Armada, subir captura y Publicada por página.
+// página, el botón Armada y Publicada por página.
 
 const ESTADO_VALIDANDO = "validando";
 const ESTADO_ENLACE_INVALIDO = "enlace_invalido";
@@ -118,31 +112,6 @@ export default function PorArmar() {
     }
   }
 
-  async function subirCaptura(imagenId, archivo) {
-    setError("");
-    const respuesta = await fetch("/.netlify/functions/firmar-captura", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ codigo, imagen_id: imagenId, tipo: archivo.type }),
-    });
-    if (!respuesta.ok) {
-      const datos = await respuesta.json().catch(() => ({}));
-      setError(datos.error ?? "No se pudo preparar la subida.");
-      return;
-    }
-    const { url_subida } = await respuesta.json();
-    const subida = await fetch(url_subida, {
-      method: "PUT",
-      headers: { "content-type": archivo.type || "application/octet-stream" },
-      body: archivo,
-    });
-    if (!subida.ok) {
-      setError("La captura no se pudo subir.");
-      return;
-    }
-    await cargar();
-  }
-
   if (estado === ESTADO_VALIDANDO) {
     return <Pantalla><p>Comprobando el enlace…</p></Pantalla>;
   }
@@ -183,7 +152,6 @@ export default function PorArmar() {
           onMarcarPublicada={marcarPublicada}
           onGuardarTexto={(texto) => guardarTexto(pieza.id, texto)}
           onCopiarTexto={() => copiarTexto(pieza.texto)}
-          onSubirCaptura={(archivo) => subirCaptura(pieza.id, archivo)}
         />
       ))}
       <BarraInferior usuario={usuario} codigo={codigo} />
@@ -198,11 +166,9 @@ function TarjetaPorArmar({
   onMarcarPublicada,
   onGuardarTexto,
   onCopiarTexto,
-  onSubirCaptura,
 }) {
   const [texto, setTexto] = useState(pieza.texto);
   const [copiado, setCopiado] = useState(false);
-  const inputCapturaRef = useRef(null);
 
   async function copiar() {
     await onCopiarTexto();
@@ -273,40 +239,6 @@ function TarjetaPorArmar({
           <button onClick={onMarcarArmada} className="btn btn-chico btn-primario">
             Armada
           </button>
-        )}
-
-        {usuario === "alejandro" && (
-          <>
-            <input
-              ref={inputCapturaRef}
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={(evento) => {
-                const archivo = evento.target.files?.[0];
-                if (archivo) onSubirCaptura(archivo);
-                evento.target.value = "";
-              }}
-            />
-            <button
-              onClick={() => inputCapturaRef.current?.click()}
-              className="btn btn-chico btn-secundario"
-            >
-              <IconoImagen />
-              {pieza.url_captura ? "Cambiar captura" : "Subir captura"}
-            </button>
-          </>
-        )}
-
-        {pieza.url_captura && (
-          <a
-            href={pieza.url_captura}
-            download
-            className="btn btn-chico btn-secundario"
-            style={{ textDecoration: "none" }}
-          >
-            <IconoDescargar /> Descargar
-          </a>
         )}
       </div>
     </div>
