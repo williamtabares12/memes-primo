@@ -198,7 +198,7 @@ function TarjetaPorArmar({ pieza, usuario, onGuardarTexto, onCopiarTexto, onArch
             </div>
             {usuario === "alejandro" && (
               <GenerarTarjeta
-                texto={pieza.texto}
+                texto={texto}
                 nombreTuit={p.nombre_tuit}
                 usuarioTuit={p.usuario_tuit}
                 avatarUrl={p.avatar_url}
