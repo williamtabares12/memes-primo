@@ -16,8 +16,10 @@ export const FUENTES_REDDIT = [
 // las de arriba, David nunca ve que salió de Reddit.
 export const FUENTE_PRESELECCION = "Páginas varias";
 
-// Todas las fuentes que puede haber en la base, para el filtro de
-// Revisar. Las de Reddit no deberían verse nunca ahí en la práctica
-// (llegan escondidas hasta que se aprueban en Preselección), pero se
-// listan igual por si alguna vez hace falta depurar algo a mano.
-export const FUENTES_FILTRO = [...FUENTES, FUENTE_PRESELECCION, ...FUENTES_REDDIT];
+// Fuentes visibles en el filtro de Revisar (David). Por ahora, solo
+// las manuales: lo de Reddit quedó en pausa (Alejandro decidió seguir
+// sacando memes a mano), así que ni "Páginas varias" ni las de Reddit
+// deben aparecer ahí — verlas sin que nunca traigan nada solo genera
+// preguntas. Si se retoma esa función, se vuelve a armar esta lista
+// con FUENTE_PRESELECCION y FUENTES_REDDIT.
+export const FUENTES_FILTRO = [...FUENTES];
