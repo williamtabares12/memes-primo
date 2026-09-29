@@ -6,10 +6,10 @@ import { IconoCheck, IconoCopiar, IconoReloj } from "../componentes/Iconos.jsx";
 import { ZONA_BOGOTA } from "../componentes/horasFijas.js";
 import PrepararImagen from "../componentes/PrepararImagen.jsx";
 
-// Pantalla Por armar (H2, H6, H10). La ven Alejandro y David: lista
-// de imágenes Elegidas o Armadas con páginas pendientes. Cada fila
-// trae el texto (editable, con copiar), la hora programada por
-// página, el botón Armada y Publicada por página.
+// Pantalla Por armar (H2, H6). La ven Alejandro y David: lista de
+// imágenes Elegidas, de referencia mientras se postean a mano. Cada
+// fila trae el texto (editable, con copiar) y la hora programada por
+// página. Alejandro la quita de la lista cuando ya terminó con ella.
 
 const ESTADO_VALIDANDO = "validando";
 const ESTADO_ENLACE_INVALIDO = "enlace_invalido";
@@ -65,36 +65,6 @@ export default function PorArmar() {
     }
     cargar();
   }, [codigo, cargar]);
-
-  async function marcarArmada(imagenId) {
-    setError("");
-    const respuesta = await fetch("/.netlify/functions/marcar-armada", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ codigo, imagen_id: imagenId }),
-    });
-    if (!respuesta.ok) {
-      const datos = await respuesta.json().catch(() => ({}));
-      setError(datos.error ?? "No se pudo marcar Armada.");
-      return;
-    }
-    await cargar();
-  }
-
-  async function marcarPublicada(publicacionId) {
-    setError("");
-    const respuesta = await fetch("/.netlify/functions/marcar-publicada", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ codigo, publicacion_id: publicacionId }),
-    });
-    if (!respuesta.ok) {
-      const datos = await respuesta.json().catch(() => ({}));
-      setError(datos.error ?? "No se pudo marcar Publicada.");
-      return;
-    }
-    await cargar();
-  }
 
   async function archivar(imagenId) {
     setError("");
@@ -157,15 +127,13 @@ export default function PorArmar() {
 
       {error && <p style={{ color: "var(--error)" }}>{error}</p>}
 
-      {piezas.length === 0 && <p>No hay nada pendiente de armar o publicar.</p>}
+      {piezas.length === 0 && <p>No hay nada pendiente.</p>}
 
       {piezas.map((pieza) => (
         <TarjetaPorArmar
           key={pieza.id}
           pieza={pieza}
           usuario={usuario}
-          onMarcarArmada={() => marcarArmada(pieza.id)}
-          onMarcarPublicada={marcarPublicada}
           onGuardarTexto={(texto) => guardarTexto(pieza.id, texto)}
           onCopiarTexto={() => copiarTexto(pieza.texto)}
           onArchivar={() => archivar(pieza.id)}
@@ -176,15 +144,7 @@ export default function PorArmar() {
   );
 }
 
-function TarjetaPorArmar({
-  pieza,
-  usuario,
-  onMarcarArmada,
-  onMarcarPublicada,
-  onGuardarTexto,
-  onCopiarTexto,
-  onArchivar,
-}) {
+function TarjetaPorArmar({ pieza, usuario, onGuardarTexto, onCopiarTexto, onArchivar }) {
   const [texto, setTexto] = useState(pieza.texto);
   const [copiado, setCopiado] = useState(false);
 
@@ -200,23 +160,12 @@ function TarjetaPorArmar({
     }
   }
 
-  const publicadas = pieza.publicaciones.filter((p) => p.publicada).length;
-  const totalPaginas = pieza.publicaciones.length;
-
   return (
     <div className="tarjeta">
-      <div style={{ position: "relative" }}>
-        <img src={pieza.url_ver} alt="Imagen" style={{ width: "100%" }} />
-        <span style={estiloBadgeEstado(pieza.estado)}>
-          {pieza.estado === "armada" ? "Armada" : "Elegida"}
-        </span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "10px 0 6px" }}>
-        <p style={{ fontWeight: 700, color: "var(--text-h)", margin: 0 }}>{pieza.fuente}</p>
-        <span style={{ fontSize: 12, opacity: 0.7 }}>
-          {publicadas} de {totalPaginas} páginas publicadas
-        </span>
-      </div>
+      <img src={pieza.url_ver} alt="Imagen" style={{ width: "100%" }} />
+      <p style={{ fontWeight: 700, color: "var(--text-h)", margin: "10px 0 6px" }}>
+        {pieza.fuente}
+      </p>
 
       <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
         <textarea
@@ -234,42 +183,22 @@ function TarjetaPorArmar({
       <div style={{ margin: "12px 0" }}>
         {pieza.publicaciones.map((p) => (
           <div key={p.id} style={estiloFilaPagina}>
-            <div>
-              <strong>{p.pagina_nombre}</strong>
-              {p.hora_programada && (
-                <div style={estiloHora}>
-                  <IconoReloj style={{ width: 14, height: 14 }} />
-                  {new Date(p.hora_programada).toLocaleString("es-CO", {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                    timeZone: ZONA_BOGOTA,
-                  })}
-                </div>
-              )}
-              {p.publicada && (
-                <div style={{ fontSize: 13, color: "var(--exito)", marginTop: 2 }}>
-                  Publicada por {p.marcada_por}
-                </div>
-              )}
-            </div>
-            {!p.publicada && (
-              <button
-                onClick={() => onMarcarPublicada(p.id)}
-                className="btn btn-chico btn-exito"
-              >
-                Publicada
-              </button>
+            <strong>{p.pagina_nombre}</strong>
+            {p.hora_programada && (
+              <div style={estiloHora}>
+                <IconoReloj style={{ width: 14, height: 14 }} />
+                {new Date(p.hora_programada).toLocaleString("es-CO", {
+                  dateStyle: "short",
+                  timeStyle: "short",
+                  timeZone: ZONA_BOGOTA,
+                })}
+              </div>
             )}
           </div>
         ))}
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {pieza.estado === "elegida" && usuario === "alejandro" && (
-          <button onClick={onMarcarArmada} className="btn btn-chico btn-primario">
-            Armada
-          </button>
-        )}
         {usuario === "alejandro" && (
           <PrepararImagen nombreArchivo={`meme-${pieza.id.slice(0, 8)}`} />
         )}
@@ -281,21 +210,6 @@ function TarjetaPorArmar({
       </div>
     </div>
   );
-}
-
-function estiloBadgeEstado(estado) {
-  return {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    fontSize: 12,
-    fontWeight: 700,
-    padding: "4px 10px",
-    borderRadius: 999,
-    background: estado === "armada" ? "var(--exito-bg)" : "var(--accent-bg)",
-    color: estado === "armada" ? "var(--exito)" : "var(--accent)",
-    backdropFilter: "blur(4px)",
-  };
 }
 
 const estiloFilaPagina = {
@@ -313,5 +227,4 @@ const estiloHora = {
   gap: 4,
   fontSize: 13,
   opacity: 0.75,
-  marginTop: 2,
 };

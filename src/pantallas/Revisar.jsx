@@ -20,7 +20,7 @@ const DISTANCIA_SALIDA = 500;
 // Pantalla Revisar (David, celular). Una imagen a la vez, con la
 // fuente arriba, el texto editable y tres botones grandes: Descartar,
 // Guardar, Elegir. H3, H4, H5 (guardar/descartar en detalle vive en
-// la pantalla de Guardadas y descartadas) y H8 (aviso de repetido).
+// la pantalla de Guardadas y descartadas).
 
 const ESTADO_VALIDANDO = "validando";
 const ESTADO_ENLACE_INVALIDO = "enlace_invalido";
@@ -43,7 +43,6 @@ export default function Revisar() {
   // Mapa id de página -> { fecha, hora } (hora programada, obligatoria
   // por página desde que David lo pidió).
   const [paginasMarcadas, setPaginasMarcadas] = useState(new Map());
-  const [aviso, setAviso] = useState(null); // { paginas_repetidas: [...] } | null
 
   // Deshacer: guarda qué imagen y qué decisión se acaba de tomar, para
   // poder revertirla mientras el aviso sigue visible.
@@ -73,7 +72,6 @@ export default function Revisar() {
     setPaginas(datos.paginas);
     setTexto(datos.imagen?.texto ?? "");
     setPaginasMarcadas(new Map());
-    setAviso(null);
     setArrastreX(0);
     setArrastrando(false);
     setEstado(ESTADO_LISTO);
@@ -111,12 +109,7 @@ export default function Revisar() {
       });
 
       if (respuesta.status === 409) {
-        const datos = await respuesta.json();
-        if (datos.aviso === "repetida") {
-          setAviso(datos.paginas_repetidas);
-          setCargandoDecision(false);
-          return;
-        }
+        const datos = await respuesta.json().catch(() => ({}));
         setError(datos.error ?? "No se pudo guardar.");
         setCargandoDecision(false);
         setArrastreX(0);
@@ -208,12 +201,12 @@ export default function Revisar() {
     paginasMarcadas.size === 0 ||
     Array.from(paginasMarcadas.values()).some((v) => !v.fecha || !v.hora);
 
-  function confirmarElegir(confirmarRepetidas = false) {
+  function confirmarElegir() {
     const paginas = Array.from(paginasMarcadas, ([id, { fecha, hora }]) => ({
       id,
       hora_programada: horaProgramadaISO(fecha, hora),
     }));
-    enviarDecision("elegida", { paginas, confirmar_repetidas: confirmarRepetidas });
+    enviarDecision("elegida", { paginas });
   }
 
   if (estado === ESTADO_VALIDANDO) {
@@ -354,35 +347,16 @@ export default function Revisar() {
               </div>
             ))}
 
-            {aviso && (
-              <div style={estiloAviso}>
-                <p style={{ margin: "0 0 8px" }}>
-                  Ya salió en: {aviso.map((p) => p.nombre).join(", ")}. ¿Elegir de todas
-                  formas?
-                </p>
-                <button
-                  onClick={() => confirmarElegir(true)}
-                  className="btn btn-chico btn-primario"
-                  style={{ width: "100%" }}
-                >
-                  Sí, elegir igual
-                </button>
-              </div>
-            )}
-
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
               <button
-                onClick={() => {
-                  setMostrarPaginas(false);
-                  setAviso(null);
-                }}
+                onClick={() => setMostrarPaginas(false)}
                 className="btn btn-chico btn-secundario"
                 style={{ flex: 1 }}
               >
                 Cancelar
               </button>
               <button
-                onClick={() => confirmarElegir(false)}
+                onClick={confirmarElegir}
                 disabled={faltaHoraProgramada || cargandoDecision}
                 className="btn btn-chico btn-primario"
                 style={{ flex: 1 }}
@@ -446,14 +420,6 @@ const estiloOpcionPagina = {
   gap: 8,
   padding: "10px 0",
   borderBottom: "1px solid var(--border)",
-};
-
-const estiloAviso = {
-  marginTop: 12,
-  padding: 12,
-  borderRadius: "var(--radio-chico)",
-  background: "var(--error-bg)",
-  color: "var(--error)",
 };
 
 function estiloZonaSwipe(arrastreX, arrastrando) {

@@ -1,5 +1,5 @@
 // POST /.netlify/functions/decidir-imagen
-// Body: { codigo, imagen_id, decision, texto?, paginas?, confirmar_repetidas? }
+// Body: { codigo, imagen_id, decision, texto?, paginas? }
 //
 // decision es "guardada", "descartada" o "elegida" (H3, H4, H5).
 // Para "elegida" hace falta paginas: [{ id, hora_programada }] con
@@ -7,15 +7,6 @@
 // (pedido de David: puede postear la misma imagen a horas distintas
 // en cada página, y nunca sin hora para no terminar con horas al
 // azar), en ISO 8601.
-//
-// H8: si el texto de esta imagen coincide con el de otra imagen que
-// ya está Publicada en alguna de las páginas marcadas, la respuesta
-// avisa en vez de crear las filas, y el frontend puede reintentar
-// con confirmar_repetidas=true para seguir de todas formas.
-// Nota de diseño: como no hay lectura automática de imagen a imagen,
-// "el mismo chiste" se detecta comparando el texto que David o
-// Alejandro escribieron a mano. Si la imagen no tiene texto, no hay
-// forma de comparar y no se avisa nada.
 
 import { identificarUsuario, respuestaNoAutorizado } from "./_lib/auth.mts";
 import { clienteDb } from "./_lib/db.mts";
@@ -43,7 +34,6 @@ export default async (req: Request) => {
     decision?: "guardada" | "descartada" | "elegida";
     texto?: string;
     paginas?: PaginaElegida[];
-    confirmar_repetidas?: boolean;
   };
   try {
     cuerpo = await req.json();
@@ -122,43 +112,6 @@ export default async (req: Request) => {
   if (paginasElegidas.some((pagina) => !pagina.hora_programada)) {
     return respuestaError("Cada página necesita su hora programada.");
   }
-  const paginasIds = paginasElegidas.map((pagina) => pagina.id);
-
-  if (textoFinal && textoFinal.trim() && !cuerpo.confirmar_repetidas) {
-    const textoNormalizado = textoFinal.trim().toLowerCase();
-
-    const { data: posiblesRepetidas, error: errorRepetidas } = await db
-      .from("publicaciones")
-      .select("pagina_id, publicada, pagina:paginas(id, nombre), imagen:imagenes(texto)")
-      .eq("publicada", true)
-      .in("pagina_id", paginasIds);
-
-    if (errorRepetidas) return respuestaError(errorRepetidas.message, 500);
-
-    const paginasRepetidas = new Map<string, string>();
-    for (const fila of posiblesRepetidas ?? []) {
-      const imagenFila = Array.isArray(fila.imagen) ? fila.imagen[0] : fila.imagen;
-      const paginaFila = Array.isArray(fila.pagina) ? fila.pagina[0] : fila.pagina;
-      const textoFila = imagenFila?.texto?.trim().toLowerCase();
-      if (textoFila && textoFila === textoNormalizado && paginaFila) {
-        paginasRepetidas.set(paginaFila.id, paginaFila.nombre);
-      }
-    }
-
-    if (paginasRepetidas.size > 0) {
-      return new Response(
-        JSON.stringify({
-          aviso: "repetida",
-          paginas_repetidas: Array.from(paginasRepetidas, ([id, nombre]) => ({
-            id,
-            nombre,
-          })),
-        }),
-        { status: 409, headers: { "content-type": "application/json" } }
-      );
-    }
-  }
-
   const { error: errorUpdate } = await db
     .from("imagenes")
     .update({
@@ -176,7 +129,6 @@ export default async (req: Request) => {
     paginasElegidas.map((pagina) => ({
       imagen_id,
       pagina_id: pagina.id,
-      publicada: false,
       hora_programada: pagina.hora_programada,
     }))
   );

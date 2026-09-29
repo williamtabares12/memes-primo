@@ -8,7 +8,7 @@ import { IconoElegir, IconoRecuperar } from "../componentes/Iconos.jsx";
 
 // Pantalla Guardadas y descartadas (David, H5). Dos pilas en pestañas;
 // cada tarjeta permite recuperar (vuelve a Nueva) o elegir (mismo
-// flujo de páginas y aviso de repetido que en Revisar, H4/H8).
+// flujo de páginas y hora que en Revisar, H4).
 
 const ESTADO_VALIDANDO = "validando";
 const ESTADO_ENLACE_INVALIDO = "enlace_invalido";
@@ -27,7 +27,6 @@ export default function GuardadasDescartadas() {
 
   const [imagenEligiendo, setImagenEligiendo] = useState(null);
   const [paginasMarcadas, setPaginasMarcadas] = useState(new Map());
-  const [aviso, setAviso] = useState(null);
 
   const cargarLista = useCallback(async () => {
     setCargando(true);
@@ -72,7 +71,6 @@ export default function GuardadasDescartadas() {
   function abrirElegir(imagen) {
     setImagenEligiendo(imagen);
     setPaginasMarcadas(new Map());
-    setAviso(null);
   }
 
   function alternarPagina(id) {
@@ -95,7 +93,7 @@ export default function GuardadasDescartadas() {
     paginasMarcadas.size === 0 ||
     Array.from(paginasMarcadas.values()).some((v) => !v.fecha || !v.hora);
 
-  async function confirmarElegir(confirmarRepetidas = false) {
+  async function confirmarElegir() {
     const paginas = Array.from(paginasMarcadas, ([id, { fecha, hora }]) => ({
       id,
       hora_programada: horaProgramadaISO(fecha, hora),
@@ -109,19 +107,9 @@ export default function GuardadasDescartadas() {
         decision: "elegida",
         texto: imagenEligiendo.texto,
         paginas,
-        confirmar_repetidas: confirmarRepetidas,
       }),
     });
 
-    if (respuesta.status === 409) {
-      const datos = await respuesta.json();
-      if (datos.aviso === "repetida") {
-        setAviso(datos.paginas_repetidas);
-        return;
-      }
-      setError(datos.error ?? "No se pudo elegir.");
-      return;
-    }
     if (!respuesta.ok) {
       const datos = await respuesta.json().catch(() => ({}));
       setError(datos.error ?? "No se pudo elegir.");
@@ -226,21 +214,6 @@ export default function GuardadasDescartadas() {
               </div>
             ))}
 
-            {aviso && (
-              <div style={estiloAviso}>
-                <p style={{ margin: "0 0 8px" }}>
-                  Ya salió en: {aviso.map((p) => p.nombre).join(", ")}. ¿Elegir de todas formas?
-                </p>
-                <button
-                  onClick={() => confirmarElegir(true)}
-                  className="btn btn-chico btn-primario"
-                  style={{ width: "100%" }}
-                >
-                  Sí, elegir igual
-                </button>
-              </div>
-            )}
-
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
               <button
                 onClick={() => setImagenEligiendo(null)}
@@ -250,7 +223,7 @@ export default function GuardadasDescartadas() {
                 Cancelar
               </button>
               <button
-                onClick={() => confirmarElegir(false)}
+                onClick={confirmarElegir}
                 disabled={faltaHoraProgramada}
                 className="btn btn-chico btn-primario"
                 style={{ flex: 1 }}
@@ -294,12 +267,4 @@ const estiloOpcionPagina = {
   gap: 8,
   padding: "10px 0",
   borderBottom: "1px solid var(--border)",
-};
-
-const estiloAviso = {
-  marginTop: 12,
-  padding: 12,
-  borderRadius: "var(--radio-chico)",
-  background: "var(--error-bg)",
-  color: "var(--error)",
 };

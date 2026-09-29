@@ -1,10 +1,10 @@
 // GET /.netlify/functions/imagenes-por-armar?codigo=...&pagina_id=...
 //
-// Pantalla Por armar (H2, H6, H10). Trae las imágenes Elegidas o
-// Armadas que todavía tienen alguna página sin Publicar y que
-// Alejandro no haya archivado a mano, con sus páginas y la hora
-// programada de cada una (pedido de David). La ven tanto Alejandro
-// como David. pagina_id es opcional (H6: "filtro por página").
+// Pantalla Por armar (H2, H6). Trae las imágenes Elegidas que
+// Alejandro no haya quitado de la lista a mano, con sus páginas y la
+// hora programada de cada una (pedido de David), de referencia
+// mientras postea a mano. La ven tanto Alejandro como David.
+// pagina_id es opcional (H6: "filtro por página").
 
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -29,10 +29,9 @@ export default async (req: Request) => {
     .select(
       `id, texto, estado, ruta_archivo,
        lote:lotes(fuente),
-       publicaciones(id, publicada, marcada_por, fecha_publicacion, hora_programada,
-         pagina:paginas(id, nombre))`
+       publicaciones(id, hora_programada, pagina:paginas(id, nombre))`
     )
-    .in("estado", ["elegida", "armada"])
+    .eq("estado", "elegida")
     .eq("archivada", false)
     .order("fecha_decision", { ascending: true });
 
@@ -50,8 +49,6 @@ export default async (req: Request) => {
 
   const piezas = await Promise.all(
     (filas ?? [])
-      // Solo las que todavía tienen alguna página sin publicar.
-      .filter((fila) => fila.publicaciones.some((p) => !p.publicada))
       // Filtro opcional por página (H6).
       .filter((fila) =>
         !paginaFiltro
@@ -73,7 +70,6 @@ export default async (req: Request) => {
           id: fila.id,
           texto: fila.texto ?? "",
           fuente: lote?.fuente ?? "",
-          estado: fila.estado,
           url_ver,
           publicaciones: fila.publicaciones.map((p) => {
             const pagina = Array.isArray(p.pagina) ? p.pagina[0] : p.pagina;
@@ -81,9 +77,6 @@ export default async (req: Request) => {
               id: p.id,
               pagina_id: pagina?.id,
               pagina_nombre: pagina?.nombre,
-              publicada: p.publicada,
-              marcada_por: p.marcada_por,
-              fecha_publicacion: p.fecha_publicacion,
               hora_programada: p.hora_programada,
             };
           }),

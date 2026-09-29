@@ -39,7 +39,7 @@ export default async (req: Request) => {
     .from("imagenes")
     .update({ archivada: true })
     .eq("id", cuerpo.imagen_id)
-    .in("estado", ["elegida", "armada"])
+    .eq("estado", "elegida")
     .select("id", { count: "exact" });
 
   if (error) return respuestaError(error.message, 500);
