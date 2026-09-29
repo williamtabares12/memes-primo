@@ -96,6 +96,21 @@ export default function PorArmar() {
     await cargar();
   }
 
+  async function archivar(imagenId) {
+    setError("");
+    const respuesta = await fetch("/.netlify/functions/archivar-imagen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ codigo, imagen_id: imagenId }),
+    });
+    if (!respuesta.ok) {
+      const datos = await respuesta.json().catch(() => ({}));
+      setError(datos.error ?? "No se pudo quitar de la lista.");
+      return;
+    }
+    setPiezas((previo) => previo.filter((pieza) => pieza.id !== imagenId));
+  }
+
   async function guardarTexto(imagenId, texto) {
     await fetch("/.netlify/functions/actualizar-texto", {
       method: "POST",
@@ -153,6 +168,7 @@ export default function PorArmar() {
           onMarcarPublicada={marcarPublicada}
           onGuardarTexto={(texto) => guardarTexto(pieza.id, texto)}
           onCopiarTexto={() => copiarTexto(pieza.texto)}
+          onArchivar={() => archivar(pieza.id)}
         />
       ))}
       <BarraInferior usuario={usuario} codigo={codigo} />
@@ -167,6 +183,7 @@ function TarjetaPorArmar({
   onMarcarPublicada,
   onGuardarTexto,
   onCopiarTexto,
+  onArchivar,
 }) {
   const [texto, setTexto] = useState(pieza.texto);
   const [copiado, setCopiado] = useState(false);
@@ -177,6 +194,15 @@ function TarjetaPorArmar({
     setTimeout(() => setCopiado(false), 1500);
   }
 
+  function quitar() {
+    if (window.confirm("¿Quitar esta pieza de Por armar? No se borra, solo deja de aparecer aquí.")) {
+      onArchivar();
+    }
+  }
+
+  const publicadas = pieza.publicaciones.filter((p) => p.publicada).length;
+  const totalPaginas = pieza.publicaciones.length;
+
   return (
     <div className="tarjeta">
       <div style={{ position: "relative" }}>
@@ -185,9 +211,12 @@ function TarjetaPorArmar({
           {pieza.estado === "armada" ? "Armada" : "Elegida"}
         </span>
       </div>
-      <p style={{ fontWeight: 700, color: "var(--text-h)", margin: "10px 0 6px" }}>
-        {pieza.fuente}
-      </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "10px 0 6px" }}>
+        <p style={{ fontWeight: 700, color: "var(--text-h)", margin: 0 }}>{pieza.fuente}</p>
+        <span style={{ fontSize: 12, opacity: 0.7 }}>
+          {publicadas} de {totalPaginas} páginas publicadas
+        </span>
+      </div>
 
       <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
         <textarea
@@ -243,6 +272,11 @@ function TarjetaPorArmar({
         )}
         {usuario === "alejandro" && (
           <PrepararImagen nombreArchivo={`meme-${pieza.id.slice(0, 8)}`} />
+        )}
+        {usuario === "alejandro" && (
+          <button onClick={quitar} className="btn btn-chico btn-peligro">
+            Quitar de la lista
+          </button>
         )}
       </div>
     </div>

@@ -1,10 +1,10 @@
 // GET /.netlify/functions/imagenes-por-armar?codigo=...&pagina_id=...
 //
 // Pantalla Por armar (H2, H6, H10). Trae las imágenes Elegidas o
-// Armadas que todavía tienen alguna página sin Publicar, con sus
-// páginas y la hora programada de cada una (pedido de David). La ven
-// tanto Alejandro como David. pagina_id es opcional (H6: "filtro por
-// página").
+// Armadas que todavía tienen alguna página sin Publicar y que
+// Alejandro no haya archivado a mano, con sus páginas y la hora
+// programada de cada una (pedido de David). La ven tanto Alejandro
+// como David. pagina_id es opcional (H6: "filtro por página").
 
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -33,6 +33,7 @@ export default async (req: Request) => {
          pagina:paginas(id, nombre))`
     )
     .in("estado", ["elegida", "armada"])
+    .eq("archivada", false)
     .order("fecha_decision", { ascending: true });
 
   const { data: filas, error } = await consulta;
