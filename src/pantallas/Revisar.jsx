@@ -5,7 +5,7 @@ import BarraInferior from "../componentes/BarraInferior.jsx";
 import SelectorHoraProgramada from "../componentes/SelectorHoraProgramada.jsx";
 import AvisoDeshacer from "../componentes/AvisoDeshacer.jsx";
 import { horaProgramadaISO } from "../componentes/horasFijas.js";
-import { FUENTES } from "../componentes/fuentes.js";
+import { FUENTES_FILTRO } from "../componentes/fuentes.js";
 import {
   IconoDescartar,
   IconoElegir,
@@ -229,7 +229,7 @@ export default function Revisar() {
       style={{ fontSize: 14 }}
     >
       <option value="">Todas las fuentes</option>
-      {FUENTES.map((f) => (
+      {FUENTES_FILTRO.map((f) => (
         <option key={f} value={f}>
           {f}
         </option>
