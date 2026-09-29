@@ -55,14 +55,22 @@ function cargarImagen(url) {
 export default function GenerarTarjeta({ texto, nombreTuit, usuarioTuit, avatarUrl, nombreArchivo = "tarjeta" }) {
   const [abierto, setAbierto] = useState(false);
   const [listo, setListo] = useState(false);
+  const [textoEditado, setTextoEditado] = useState(texto || "");
   const canvasRef = useRef(null);
+  const avatarImgRef = useRef(null);
 
   async function abrir() {
     setAbierto(true);
     setListo(false);
-    const avatarImg = await cargarImagen(avatarUrl);
-    dibujar(avatarImg);
+    setTextoEditado(texto || "");
+    avatarImgRef.current = await cargarImagen(avatarUrl);
+    dibujar(avatarImgRef.current, texto || "");
     setListo(true);
+  }
+
+  function cambiarTexto(valor) {
+    setTextoEditado(valor);
+    dibujar(avatarImgRef.current, valor);
   }
 
   function cerrar() {
@@ -70,12 +78,12 @@ export default function GenerarTarjeta({ texto, nombreTuit, usuarioTuit, avatarU
     setListo(false);
   }
 
-  function dibujar(avatarImg) {
+  function dibujar(avatarImg, textoAUsar) {
     const medidor = document.createElement("canvas").getContext("2d");
     medidor.font = FUENTE_TEXTO;
     const maxAnchoTexto = ANCHO_CONTENIDO - PADDING * 2;
     const lineas = [];
-    (texto || "").split("\n").forEach((parrafo) => {
+    (textoAUsar || "").split("\n").forEach((parrafo) => {
       lineas.push(...envolverTexto(medidor, parrafo, maxAnchoTexto));
     });
 
@@ -182,6 +190,16 @@ export default function GenerarTarjeta({ texto, nombreTuit, usuarioTuit, avatarU
                 border: "1px solid var(--border)",
               }}
             />
+
+            {listo && (
+              <textarea
+                value={textoEditado}
+                onChange={(evento) => cambiarTexto(evento.target.value)}
+                rows={3}
+                placeholder="Texto del meme…"
+                style={{ width: "100%", marginTop: 10 }}
+              />
+            )}
 
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
               <button onClick={cerrar} className="btn btn-chico btn-secundario" style={{ flex: 1 }}>
