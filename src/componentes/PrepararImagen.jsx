@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IconoDescargar, IconoImagen } from "./Iconos.jsx";
 
 // Herramienta "Preparar imagen" (Por armar, H10-bis): reemplaza el
@@ -58,6 +58,24 @@ export default function PrepararImagen({ nombreArchivo = "imagen-lista" }) {
     // Se abre el selector de archivos apenas se muestra el panel.
     setTimeout(() => inputRef.current?.click(), 0);
   }
+
+  // Mientras el panel está abierto, también acepta pegar una imagen
+  // copiada (Ctrl+V, o "Pegar" del teclado), sin tener que abrir la
+  // galería.
+  useEffect(() => {
+    if (!abierto) return;
+    function alPegar(evento) {
+      const items = evento.clipboardData?.items;
+      if (!items) return;
+      const item = Array.from(items).find((it) => it.type.startsWith("image/"));
+      if (!item) return;
+      evento.preventDefault();
+      procesarArchivo(item.getAsFile());
+    }
+    window.addEventListener("paste", alPegar);
+    return () => window.removeEventListener("paste", alPegar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abierto]);
 
   function cerrar() {
     setAbierto(false);
@@ -230,7 +248,8 @@ export default function PrepararImagen({ nombreArchivo = "imagen-lista" }) {
 
             {!listo && (
               <p style={{ fontSize: 14, opacity: 0.75 }}>
-                Elige el pantallazo completo del tuit (tal como lo tomó el celular, sin recortar)…
+                Elige el pantallazo completo del tuit (tal como lo tomó el celular, sin
+                recortar), o pégalo directo si ya lo copiaste (Ctrl+V, o "Pegar" del teclado)…
               </p>
             )}
 
