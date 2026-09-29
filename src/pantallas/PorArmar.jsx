@@ -4,7 +4,7 @@ import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import { IconoCheck, IconoCopiar, IconoReloj } from "../componentes/Iconos.jsx";
 import { ZONA_BOGOTA } from "../componentes/horasFijas.js";
-import PrepararImagen from "../componentes/PrepararImagen.jsx";
+import GenerarTarjeta from "../componentes/GenerarTarjeta.jsx";
 
 // Pantalla Por armar (H2, H6). La ven Alejandro y David: lista de
 // imágenes Elegidas, de referencia mientras se postean a mano. Cada
@@ -183,25 +183,33 @@ function TarjetaPorArmar({ pieza, usuario, onGuardarTexto, onCopiarTexto, onArch
       <div style={{ margin: "12px 0" }}>
         {pieza.publicaciones.map((p) => (
           <div key={p.id} style={estiloFilaPagina}>
-            <strong>{p.pagina_nombre}</strong>
-            {p.hora_programada && (
-              <div style={estiloHora}>
-                <IconoReloj style={{ width: 14, height: 14 }} />
-                {new Date(p.hora_programada).toLocaleString("es-CO", {
-                  dateStyle: "short",
-                  timeStyle: "short",
-                  timeZone: ZONA_BOGOTA,
-                })}
-              </div>
+            <div>
+              <strong>{p.pagina_nombre}</strong>
+              {p.hora_programada && (
+                <div style={estiloHora}>
+                  <IconoReloj style={{ width: 14, height: 14 }} />
+                  {new Date(p.hora_programada).toLocaleString("es-CO", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                    timeZone: ZONA_BOGOTA,
+                  })}
+                </div>
+              )}
+            </div>
+            {usuario === "alejandro" && (
+              <GenerarTarjeta
+                texto={pieza.texto}
+                nombreTuit={p.nombre_tuit}
+                usuarioTuit={p.usuario_tuit}
+                avatarUrl={p.avatar_url}
+                nombreArchivo={`meme-${pieza.id.slice(0, 8)}-${p.pagina_nombre}`}
+              />
             )}
           </div>
         ))}
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {usuario === "alejandro" && (
-          <PrepararImagen nombreArchivo={`meme-${pieza.id.slice(0, 8)}`} />
-        )}
         {usuario === "alejandro" && (
           <button onClick={quitar} className="btn btn-chico btn-peligro">
             Quitar de la lista
