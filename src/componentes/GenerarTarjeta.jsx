@@ -17,9 +17,9 @@ import { IconoDescargar, IconoImagen } from "./Iconos.jsx";
 const LADO_CANVAS = 1080;
 const ANCHO_CONTENIDO = 1000;
 const PADDING = 26;
-const AVATAR_DIAM = 133;
+const AVATAR_DIAM = 155;
 const GAP_AVATAR_NOMBRE_X = 26; // espacio horizontal entre el avatar y el nombre
-const GAP_ENCABEZADO_TEXTO = 114; // espacio vertical entre el avatar y la primera línea del tuit
+const GAP_ENCABEZADO_TEXTO = 92; // espacio vertical entre el avatar y la primera línea del tuit
 const USUARIO_OFFSET_Y = 77; // dónde cae el @usuario, medido desde arriba del avatar
 const ALTO_LINEA_TEXTO = 86;
 
