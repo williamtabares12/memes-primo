@@ -16,16 +16,23 @@ import { IconoDescargar, IconoImagen } from "./Iconos.jsx";
 // real que reemplaza.
 const LADO_CANVAS = 1080;
 const ANCHO_CONTENIDO = 1000;
-const PADDING = 26;
+const PADDING = 23;
 const AVATAR_DIAM = 155;
 const GAP_AVATAR_NOMBRE_X = 26; // espacio horizontal entre el avatar y el nombre
-const GAP_ENCABEZADO_TEXTO = 92; // espacio vertical entre el avatar y la primera línea del tuit
-const USUARIO_OFFSET_Y = 77; // dónde cae el @usuario, medido desde arriba del avatar
-const ALTO_LINEA_TEXTO = 86;
+const GAP_ENCABEZADO_TEXTO = 68; // espacio vertical entre el avatar y la primera línea del tuit
+const USUARIO_OFFSET_Y = 60; // dónde cae el @usuario, medido desde arriba del avatar
+const ALTO_LINEA_TEXTO = 69;
 
-const FUENTE_NOMBRE = "700 62px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-const FUENTE_USUARIO = "53px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-const FUENTE_TEXTO = "65px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+// Segunda vuelta de calibración (oct/2026): David comparó un pantallazo
+// real de X contra la tarjeta generada y la letra (nombre, usuario y
+// texto) salía entre 15% y 30% más grande de lo debido en proporción al
+// ancho de la tarjeta, lo que partía el texto en más líneas de las que
+// corresponde. Medido en píxeles contra el pantallazo real y corregido
+// acá (nombre y usuario quedan del mismo tamaño, como en X real: la
+// diferencia ahí es solo negrita vs. normal, no el tamaño de letra).
+const FUENTE_NOMBRE = "700 48px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const FUENTE_USUARIO = "48px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const FUENTE_TEXTO = "52px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 function envolverTexto(ctx, texto, maxAncho) {
   if (texto.trim() === "") return [""];
