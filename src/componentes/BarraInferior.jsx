@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   IconoElegir,
   IconoGuardar,
+  IconoImagen,
   IconoLista,
   IconoSubir,
 } from "./Iconos.jsx";
@@ -20,6 +21,7 @@ const PESTANAS_POR_USUARIO = {
     { ruta: "/subir", etiqueta: "Subir", Icono: IconoSubir },
     { ruta: "/preseleccion", etiqueta: "Preselección", Icono: IconoElegir },
     { ruta: "/armar", etiqueta: "Por armar", Icono: IconoLista },
+    { ruta: "/tarjeta-libre", etiqueta: "Tarjeta libre", Icono: IconoImagen },
   ],
   david: [
     { ruta: "/revisar", etiqueta: "Revisar", Icono: IconoElegir },
