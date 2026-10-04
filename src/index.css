@@ -59,11 +59,6 @@
     --sombra-flotante: 0 8px 28px rgba(0, 0, 0, 0.5);
   }
 
-  /* En oscuro, el botón primario se invierte (claro sobre carbón) y
-     el color de texto vuelve a carbón para no perder contraste. */
-  .btn-primario {
-    color: #1d1f20;
-  }
 }
 
 * {
@@ -216,6 +211,17 @@ a {
 
 .btn-primario:hover:not(:disabled) {
   background: var(--accent-h);
+}
+
+/* En oscuro --accent pasa a ser casi blanco (botón claro sobre fondo
+   carbón), así que el texto tiene que volver a carbón; si no, queda
+   texto claro sobre fondo claro y no se lee. Va después de la regla
+   base para ganarle en la cascada (misma especificidad, pero esta
+   es la que aparece más abajo en el archivo). */
+@media (prefers-color-scheme: dark) {
+  .btn-primario {
+    color: #1d1f20;
+  }
 }
 
 .btn-secundario {
