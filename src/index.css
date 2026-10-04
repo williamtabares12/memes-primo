@@ -1,25 +1,34 @@
 :root {
-  --text: #4b4553;
-  --text-h: #08060d;
-  --bg: #fff;
-  --bg-suave: #f7f6f9;
+  /* Paleta tomada de DESIGN.md ("Captions — sunlit editing desk"):
+     canvas papel-blanco, superficies celeste-pálido para lo elevado,
+     tinta carbón para texto fuerte y cian como único acento de
+     selección (nunca como relleno genérico de botón). */
+  --text: #7e8486; /* Ash Copy */
+  --text-medio: #434647; /* Graphite Copy */
+  --text-h: #1d1f20; /* Charcoal */
+  --bg: #fff; /* Paper White */
+  --bg-suave: #effbff; /* Air Wash */
   --bg-elevada: #ffffff;
-  --border: #e5e4e7;
-  --accent: #9a2ee6;
-  --accent-h: #7f1fc4;
-  --accent-bg: rgba(154, 46, 230, 0.1);
+  --border: #d0d6d7; /* Steel Inset */
+  --border-suave: #e8eff2; /* Mist Border */
+  --accent: #1d1f20; /* Charcoal — acción principal (Dark Ink Button) */
+  --accent-h: #000000;
+  --accent-bg: #ccf6ff; /* Cyan Halo */
+  --cian: #00d0ff; /* Prism Cyan — solo para estados seleccionados */
   --error: #c62828;
   --error-bg: rgba(198, 40, 40, 0.08);
   --exito: #2e7d32;
   --exito-bg: rgba(46, 125, 50, 0.08);
 
   --radio: 12px;
-  --radio-chico: 8px;
-  --sombra: 0 1px 2px rgba(20, 10, 30, 0.04), 0 4px 16px rgba(20, 10, 30, 0.06);
-  --sombra-flotante: 0 8px 24px rgba(20, 10, 30, 0.18);
+  --radio-chico: 10px;
+  --radio-imagen: 20px;
+  --sombra: rgba(0, 0, 0, 0.05) 0 4px 10px 0, rgb(208, 214, 215) 0 0 0 0.5px inset;
+  --sombra-flotante: 0 8px 24px rgba(29, 31, 32, 0.14);
   --transicion: 140ms ease;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --serif: 'Libre Baskerville', Georgia, serif;
 
   font: 16px/145% var(--sans);
   color-scheme: light dark;
@@ -30,21 +39,30 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #b8b3c2;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --bg-suave: #1c1d24;
-    --bg-elevada: #21222b;
-    --border: #313240;
-    --accent: #c084fc;
-    --accent-h: #d3a7fd;
-    --accent-bg: rgba(192, 132, 252, 0.16);
+    --text: #a8aeb0;
+    --text-medio: #c4c8c9;
+    --text-h: #f5f7f8;
+    --bg: #1d1f20; /* Charcoal Surface */
+    --bg-suave: #161718;
+    --bg-elevada: #262829;
+    --border: #3a3d3e;
+    --border-suave: #2c2e2f;
+    --accent: #f5f7f8;
+    --accent-h: #ffffff;
+    --accent-bg: rgba(0, 208, 255, 0.16);
+    --cian: #3fdcff;
     --error: #ef5350;
     --error-bg: rgba(239, 83, 80, 0.12);
     --exito: #66bb6a;
     --exito-bg: rgba(102, 187, 106, 0.12);
-    --sombra: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.28);
-    --sombra-flotante: 0 8px 28px rgba(0, 0, 0, 0.45);
+    --sombra: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.35);
+    --sombra-flotante: 0 8px 28px rgba(0, 0, 0, 0.5);
+  }
+
+  /* En oscuro, el botón primario se invierte (claro sobre carbón) y
+     el color de texto vuelve a carbón para no perder contraste. */
+  .btn-primario {
+    color: #1d1f20;
   }
 }
 
@@ -69,8 +87,13 @@ h2 {
 }
 
 h1 {
-  font-size: 22px;
+  font: 700 25px/1.15 var(--serif);
+  letter-spacing: -0.3px;
   margin: 0;
+}
+
+h2 {
+  font-size: 17px;
 }
 
 button,
@@ -108,30 +131,37 @@ a {
 
 .chip {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   padding: 6px 12px;
   border-radius: 999px;
   background: var(--bg-elevada);
   border: 1px solid var(--border);
-  color: var(--text);
+  color: var(--text-medio);
   text-decoration: none;
   white-space: nowrap;
   transition: background var(--transicion), color var(--transicion), border-color var(--transicion);
 }
 
 .chip:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--cian);
+  color: var(--text-h);
 }
 
 .contador {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 6px 14px;
   border-radius: 999px;
   background: var(--accent-bg);
-  color: var(--accent);
+  color: #006c82;
+  box-shadow: 0 0 0 0.5px rgba(0, 208, 255, 0.35) inset;
   white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .contador {
+    color: var(--cian);
+  }
 }
 
 /* Botones */
@@ -154,7 +184,7 @@ a {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--cian);
   outline-offset: 2px;
 }
 
@@ -181,7 +211,7 @@ a {
 .btn-primario {
   background: var(--accent);
   color: #fff;
-  box-shadow: var(--sombra);
+  box-shadow: rgba(0, 0, 0, 0.05) 0 4px 10px 0;
 }
 
 .btn-primario:hover:not(:disabled) {
@@ -204,18 +234,20 @@ a {
   color: var(--exito);
 }
 
-/* Tarjetas */
+/* Tarjetas: planas, con el borde fino en vez de sombra marcada
+   (DESIGN.md: "cards are predominantly flat with borders or an
+   inset edge, not broad dark shadows"). */
 .tarjeta {
   background: var(--bg-elevada);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-suave);
   border-radius: var(--radio);
-  box-shadow: var(--sombra);
+  box-shadow: rgb(208, 214, 215) 0 0 0 0.5px inset;
   padding: 14px;
 }
 
 .tarjeta img {
   display: block;
-  border-radius: var(--radio-chico);
+  border-radius: var(--radio-imagen);
 }
 
 /* Campos */
@@ -223,7 +255,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-h);
   font-size: 14px;
 }
@@ -237,7 +269,7 @@ select {
   border: 1px solid var(--border);
   background: var(--bg-elevada);
   color: var(--text-h);
-  transition: border-color var(--transicion);
+  transition: border-color var(--transicion), box-shadow var(--transicion);
 }
 
 input[type='text']:focus,
@@ -245,7 +277,8 @@ input[type='datetime-local']:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--cian);
+  box-shadow: 0 0 0 3px rgba(0, 208, 255, 0.15);
 }
 
 textarea {

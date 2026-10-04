@@ -43,7 +43,7 @@ export default function BarraInferior({ usuario, codigo }) {
           <Link
             key={ruta}
             to={`${ruta}?codigo=${encodeURIComponent(codigo)}`}
-            style={{ ...estiloPestana, color: activa ? "var(--accent)" : "var(--text)" }}
+            style={{ ...estiloPestana, color: activa ? "var(--cian)" : "var(--text)" }}
           >
             <Icono style={{ opacity: activa ? 1 : 0.75 }} />
             <span style={{ fontSize: 11, fontWeight: activa ? 700 : 600 }}>{etiqueta}</span>
@@ -54,6 +54,9 @@ export default function BarraInferior({ usuario, codigo }) {
   );
 }
 
+// Repisa flotante traslúcida, como el header del DESIGN.md pero
+// anclada abajo: vidrio esmerilado sobre el contenido en vez de un
+// panel opaco pegado al borde.
 const estiloBarra = {
   position: "fixed",
   left: "50%",
@@ -62,8 +65,11 @@ const estiloBarra = {
   width: "100%",
   maxWidth: 480,
   display: "flex",
-  background: "var(--bg-elevada)",
-  borderTop: "1px solid var(--border)",
+  background: "color-mix(in srgb, var(--bg-elevada) 88%, transparent)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  borderTop: "1px solid var(--border-suave)",
+  borderRadius: "20px 20px 0 0",
   boxShadow: "var(--sombra-flotante)",
   paddingBottom: "env(safe-area-inset-bottom, 0px)",
   zIndex: 10,
