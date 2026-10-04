@@ -301,6 +301,7 @@ export default function Revisar() {
           onClick={() => enviarDecision("descartada")}
           disabled={cargandoDecision}
           className="btn btn-grande btn-peligro"
+          style={estiloBotonFila}
         >
           <IconoDescartar /> Descartar
         </button>
@@ -308,6 +309,7 @@ export default function Revisar() {
           onClick={() => enviarDecision("guardada")}
           disabled={cargandoDecision}
           className="btn btn-grande btn-secundario"
+          style={estiloBotonFila}
         >
           <IconoGuardar /> Guardar
         </button>
@@ -315,6 +317,7 @@ export default function Revisar() {
           onClick={() => setMostrarPaginas(true)}
           disabled={cargandoDecision}
           className="btn btn-grande btn-primario"
+          style={estiloBotonFila}
         >
           <IconoElegir /> Elegir
         </button>
@@ -392,6 +395,20 @@ const estiloFuente = {
 const estiloBotones = {
   display: "flex",
   gap: 8,
+};
+
+// Sin flex:1 los tres botones se angostaban según su propio texto y
+// "Elegir" (el último) terminaba empujado fuera del ancho visible en
+// celular. Con flex:1 + minWidth:0 se reparten el espacio en partes
+// iguales y el texto se trunca con "…" en vez de desbordar.
+const estiloBotonFila = {
+  flex: 1,
+  minWidth: 0,
+  padding: "13px 8px",
+  fontSize: 14,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
 };
 
 const estiloModal = {
