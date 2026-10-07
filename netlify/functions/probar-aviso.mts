@@ -68,7 +68,7 @@ export default async (req: Request) => {
     diagnostico.ntfy_acepto_el_mensaje = envio.ok;
     if (!envio.ok) diagnostico.ntfy_error = envio.descripcion;
     diagnostico.resumen = envio.ok
-      ? "ntfy aceptó el mensaje. Si no te llegó al teléfono, el problema está en la app o en la suscripción (mismo tema, notificaciones permitidas)."
+      ? `ntfy aceptó el mensaje. El tema que usa la función tiene ${tema.length} caracteres y empieza con "${tema.slice(0, 8)}" y termina en "${tema.slice(-4)}". Si no te llegó al teléfono, compáralo con el tema al que estás suscrito: tiene que ser idéntico.`
       : "ntfy rechazó el mensaje; mira ntfy_error.";
   }
 
