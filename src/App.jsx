@@ -5,6 +5,7 @@ import GuardadasDescartadas from "./pantallas/GuardadasDescartadas.jsx";
 import PorArmar from "./pantallas/PorArmar.jsx";
 import Preseleccion from "./pantallas/Preseleccion.jsx";
 import TarjetaLibre from "./pantallas/TarjetaLibre.jsx";
+import Directas from "./pantallas/Directas.jsx";
 import Pantalla from "./componentes/Pantalla.jsx";
 
 // Cada persona entra con su propio enlace privado, algo como:
@@ -33,6 +34,7 @@ function App() {
         <Route path="/armar" element={<PorArmar />} />
         <Route path="/preseleccion" element={<Preseleccion />} />
         <Route path="/tarjeta-libre" element={<TarjetaLibre />} />
+        <Route path="/directas" element={<Directas />} />
       </Routes>
     </BrowserRouter>
   );

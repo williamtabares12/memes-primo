@@ -36,3 +36,23 @@ export function fechaHoyLocal() {
 export function horaProgramadaISO(fecha, hora) {
   return new Date(`${fecha}T${hora}:00${OFFSET_BOGOTA}`).toISOString();
 }
+
+// Lo contrario de horaProgramadaISO: de un instante ISO saca la
+// fecha ("YYYY-MM-DD") y la hora en punto ("HH:00") tal como se ven
+// en Bogotá, para precargar SelectorHoraProgramada con una hora ya
+// guardada. Devuelve undefined si no hay hora.
+export function partesBogota(iso) {
+  if (!iso) return undefined;
+  const fecha = new Intl.DateTimeFormat("en-CA", {
+    timeZone: ZONA_BOGOTA,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(iso));
+  const hora = new Intl.DateTimeFormat("en-GB", {
+    timeZone: ZONA_BOGOTA,
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date(iso));
+  return { fecha, hora: `${hora}:00` };
+}

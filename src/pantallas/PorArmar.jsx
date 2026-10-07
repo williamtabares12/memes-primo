@@ -3,13 +3,17 @@ import { useSearchParams } from "react-router-dom";
 import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import { IconoCheck, IconoCopiar, IconoReloj } from "../componentes/Iconos.jsx";
-import { ZONA_BOGOTA } from "../componentes/horasFijas.js";
+import { ZONA_BOGOTA, horaProgramadaISO, partesBogota } from "../componentes/horasFijas.js";
 import GenerarTarjeta from "../componentes/GenerarTarjeta.jsx";
+import SelectorHoraProgramada from "../componentes/SelectorHoraProgramada.jsx";
 
 // Pantalla Por armar (H2, H6). La ven Alejandro y David: lista de
 // imágenes Elegidas, de referencia mientras se postean a mano. Cada
 // fila trae el texto (editable, con copiar) y la hora programada por
 // página. Alejandro la quita de la lista cuando ya terminó con ella.
+// Además, solo Alejandro puede marcar una página como "directa" (se
+// sube a mano a esa hora, con aviso por Telegram; ver
+// docs/especificacion-directas.md).
 
 const ESTADO_VALIDANDO = "validando";
 const ESTADO_ENLACE_INVALIDO = "enlace_invalido";
@@ -84,6 +88,37 @@ export default function PorArmar() {
     setPiezas((previo) => previo.filter((pieza) => pieza.id !== imagenId));
   }
 
+  // Marca o desmarca una publicación (una página de una pieza) como
+  // directa. horaISO es opcional: si viene, también cambia la hora.
+  async function marcarDirecta(publicacionId, directa, horaISO) {
+    setError("");
+    const respuesta = await fetch("/.netlify/functions/marcar-directa", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        codigo,
+        publicacion_id: publicacionId,
+        directa,
+        ...(horaISO ? { hora_programada: horaISO } : {}),
+      }),
+    });
+    const datos = await respuesta.json().catch(() => ({}));
+    if (!respuesta.ok) {
+      setError(datos.error ?? "No se pudo cambiar la publicación directa.");
+      return;
+    }
+    setPiezas((previo) =>
+      previo.map((pieza) => ({
+        ...pieza,
+        publicaciones: pieza.publicaciones.map((p) =>
+          p.id === publicacionId
+            ? { ...p, directa: datos.directa, hora_programada: datos.hora_programada }
+            : p
+        ),
+      }))
+    );
+  }
+
   async function guardarTexto(imagenId, texto) {
     await fetch("/.netlify/functions/actualizar-texto", {
       method: "POST",
@@ -140,6 +175,7 @@ export default function PorArmar() {
           onGuardarTexto={(texto) => guardarTexto(pieza.id, texto)}
           onCopiarTexto={() => copiarTexto(pieza.texto)}
           onArchivar={() => archivar(pieza.id)}
+          onMarcarDirecta={marcarDirecta}
         />
       ))}
       <BarraInferior usuario={usuario} codigo={codigo} />
@@ -147,7 +183,14 @@ export default function PorArmar() {
   );
 }
 
-function TarjetaPorArmar({ pieza, usuario, onGuardarTexto, onCopiarTexto, onArchivar }) {
+function TarjetaPorArmar({
+  pieza,
+  usuario,
+  onGuardarTexto,
+  onCopiarTexto,
+  onArchivar,
+  onMarcarDirecta,
+}) {
   const [texto, setTexto] = useState(pieza.texto);
   const [copiado, setCopiado] = useState(false);
 
@@ -185,28 +228,65 @@ function TarjetaPorArmar({ pieza, usuario, onGuardarTexto, onCopiarTexto, onArch
 
       <div style={{ margin: "12px 0" }}>
         {pieza.publicaciones.map((p) => (
-          <div key={p.id} style={estiloFilaPagina}>
-            <div>
-              <strong>{p.pagina_nombre}</strong>
-              {p.hora_programada && (
-                <div style={estiloHora}>
-                  <IconoReloj style={{ width: 14, height: 14 }} />
-                  {new Date(p.hora_programada).toLocaleString("es-CO", {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                    timeZone: ZONA_BOGOTA,
-                  })}
-                </div>
+          <div key={p.id} style={estiloBloquePagina}>
+            <div style={estiloFilaPagina}>
+              <div>
+                <strong style={estiloNombrePagina}>{p.pagina_nombre}</strong>
+                {(p.hora_programada || p.publicada) && (
+                  <div style={estiloHora}>
+                    {p.hora_programada && (
+                      <>
+                        <IconoReloj style={{ width: 14, height: 14 }} />
+                        {new Date(p.hora_programada).toLocaleString("es-CO", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                          timeZone: ZONA_BOGOTA,
+                        })}
+                      </>
+                    )}
+                    {p.directa && !p.publicada && (
+                      <span className="contador" style={estiloEtiquetaDirecta}>
+                        Directa
+                      </span>
+                    )}
+                    {p.publicada && <span style={estiloSubida}>Ya subida</span>}
+                  </div>
+                )}
+              </div>
+              {usuario === "alejandro" && (
+                <GenerarTarjeta
+                  texto={texto}
+                  nombreTuit={p.nombre_tuit}
+                  usuarioTuit={p.usuario_tuit}
+                  avatarUrl={p.avatar_url}
+                  nombreArchivo={`meme-${pieza.id.slice(0, 8)}-${p.pagina_nombre}`}
+                />
               )}
             </div>
-            {usuario === "alejandro" && (
-              <GenerarTarjeta
-                texto={texto}
-                nombreTuit={p.nombre_tuit}
-                usuarioTuit={p.usuario_tuit}
-                avatarUrl={p.avatar_url}
-                nombreArchivo={`meme-${pieza.id.slice(0, 8)}-${p.pagina_nombre}`}
-              />
+
+            {usuario === "alejandro" && !p.publicada && (
+              <div style={estiloDirecta}>
+                {p.hora_programada ? (
+                  <label style={estiloInterruptor}>
+                    <input
+                      type="checkbox"
+                      checked={!!p.directa}
+                      onChange={(evento) => onMarcarDirecta(p.id, evento.target.checked)}
+                    />
+                    Subir directo (te aviso por Telegram)
+                  </label>
+                ) : (
+                  <span style={estiloHora}>Elige la hora para marcarla como directa:</span>
+                )}
+                {(p.directa || !p.hora_programada) && (
+                  <SelectorHoraProgramada
+                    valor={partesBogota(p.hora_programada)}
+                    onCambiar={({ fecha, hora }) => {
+                      if (fecha && hora) onMarcarDirecta(p.id, true, horaProgramadaISO(fecha, hora));
+                    }}
+                  />
+                )}
+              </div>
             )}
           </div>
         ))}
@@ -223,18 +303,55 @@ function TarjetaPorArmar({ pieza, usuario, onGuardarTexto, onCopiarTexto, onArch
   );
 }
 
+const estiloBloquePagina = {
+  padding: "8px 0",
+  borderBottom: "1px solid var(--border)",
+};
+
 const estiloFilaPagina = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   gap: 8,
-  padding: "8px 0",
-  borderBottom: "1px solid var(--border)",
+};
+
+const estiloDirecta = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  gap: 8,
+  marginTop: 10,
+};
+
+const estiloInterruptor = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  fontSize: 14,
+  color: "var(--text-h)",
+};
+
+const estiloNombrePagina = {
+  color: "var(--text-h)",
+  whiteSpace: "nowrap",
+};
+
+const estiloEtiquetaDirecta = {
+  marginLeft: 4,
+  padding: "2px 10px",
+  fontSize: 12,
+};
+
+const estiloSubida = {
+  marginLeft: 4,
+  fontSize: 12,
+  color: "var(--exito)",
 };
 
 const estiloHora = {
   display: "flex",
   alignItems: "center",
+  flexWrap: "wrap",
   gap: 4,
   fontSize: 13,
   opacity: 0.75,

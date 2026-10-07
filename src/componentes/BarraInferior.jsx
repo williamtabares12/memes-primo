@@ -4,6 +4,7 @@ import {
   IconoGuardar,
   IconoImagen,
   IconoLista,
+  IconoReloj,
   IconoSubir,
 } from "./Iconos.jsx";
 
@@ -21,7 +22,8 @@ const PESTANAS_POR_USUARIO = {
     { ruta: "/subir", etiqueta: "Subir", Icono: IconoSubir },
     { ruta: "/preseleccion", etiqueta: "Preselección", Icono: IconoElegir },
     { ruta: "/armar", etiqueta: "Por armar", Icono: IconoLista },
-    { ruta: "/tarjeta-libre", etiqueta: "Tarjeta libre", Icono: IconoImagen },
+    { ruta: "/directas", etiqueta: "Directas", Icono: IconoReloj },
+    { ruta: "/tarjeta-libre", etiqueta: "Tarjeta", Icono: IconoImagen },
   ],
   david: [
     { ruta: "/revisar", etiqueta: "Revisar", Icono: IconoElegir },
@@ -46,7 +48,9 @@ export default function BarraInferior({ usuario, codigo }) {
             style={{ ...estiloPestana, color: activa ? "var(--cian)" : "var(--text)" }}
           >
             <Icono style={{ opacity: activa ? 1 : 0.75 }} />
-            <span style={{ fontSize: 11, fontWeight: activa ? 700 : 600 }}>{etiqueta}</span>
+            <span style={{ fontSize: pestanas.length > 4 ? 10 : 11, fontWeight: activa ? 700 : 600 }}>
+              {etiqueta}
+            </span>
           </Link>
         );
       })}

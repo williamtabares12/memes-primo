@@ -29,7 +29,7 @@ export default async (req: Request) => {
     .select(
       `id, texto, estado, ruta_archivo,
        lote:lotes(fuente),
-       publicaciones(id, hora_programada, pagina:paginas(id, nombre, nombre_tuit, usuario_tuit, avatar_url))`
+       publicaciones(id, hora_programada, directa, publicada, pagina:paginas(id, nombre, nombre_tuit, usuario_tuit, avatar_url))`
     )
     .eq("estado", "elegida")
     .eq("archivada", false)
@@ -81,6 +81,9 @@ export default async (req: Request) => {
               usuario_tuit: pagina?.usuario_tuit,
               avatar_url: pagina?.avatar_url,
               hora_programada: p.hora_programada,
+              // "Directa" es cosa de Alejandro: David no la ve.
+              directa: usuario === "alejandro" ? p.directa : false,
+              publicada: p.publicada,
             };
           }),
         };
