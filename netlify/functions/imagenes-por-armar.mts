@@ -24,18 +24,27 @@ export default async (req: Request) => {
 
   const db = clienteDb();
 
-  let consulta = db
-    .from("imagenes")
-    .select(
-      `id, texto, estado, ruta_archivo,
-       lote:lotes(fuente),
-       publicaciones(id, hora_programada, directa, publicada, pagina:paginas(id, nombre, nombre_tuit, usuario_tuit, avatar_url))`
-    )
-    .eq("estado", "elegida")
-    .eq("archivada", false)
-    .order("fecha_decision", { ascending: true });
+  // `directa` y `publicada` (publicaciones directas, migración 0015) son
+  // columnas nuevas. Si la migración todavía no se corrió, se reintenta
+  // sin ellas para no dejar Por armar caído para los dos usuarios: las
+  // piezas salen igual, solo sin la marca de directa.
+  const consultar = (columnasPublicacion: string) =>
+    db
+      .from("imagenes")
+      .select(
+        `id, texto, estado, ruta_archivo,
+         lote:lotes(fuente),
+         publicaciones(${columnasPublicacion}, pagina:paginas(id, nombre, nombre_tuit, usuario_tuit, avatar_url))`
+      )
+      .eq("estado", "elegida")
+      .eq("archivada", false)
+      .order("fecha_decision", { ascending: true });
 
-  const { data: filas, error } = await consulta;
+  let { data: filas, error } = await consultar("id, hora_programada, directa, publicada");
+  if (error && (error.code === "42703" || /does not exist/i.test(error.message))) {
+    console.warn("imagenes-por-armar: falta la migración 0015, se consulta sin directa/publicada.");
+    ({ data: filas, error } = await consultar("id, hora_programada"));
+  }
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
