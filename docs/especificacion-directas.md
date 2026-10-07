@@ -20,7 +20,7 @@ La app ya guarda una hora por página (`hora_programada`, la que David escribe a
 | N.º | Historia | Criterio de aceptación |
 | --- | --- | --- |
 | D1 | Alejandro marca una publicación de Por armar como directa. | En cada página de una pieza aparece un interruptor "Subir directo". Al activarlo la fila muestra la etiqueta Directa y deja cambiar la hora. David no ve ni el interruptor ni la etiqueta. |
-| D2 | Alejandro ve en un solo lugar qué directas le faltan por subir. | La pestaña Directas lista las directas pendientes ordenadas por hora, cada una con imagen, página, hora, cuánto falta (o cuánto lleva de atraso) y el texto con botón de copiar. |
+| D2 | Alejandro ve en un solo lugar qué directas le faltan por subir. | La pestaña Directas lista las directas pendientes ordenadas por hora, cada una con imagen, página, hora, cuánto falta (o cuánto lleva de atraso), el texto con botón de copiar y el botón Generar tarjeta, para armar y descargar la tarjeta sin pasar por Por armar. |
 | D3 | Alejandro recibe un aviso antes de la hora, con el meme. | Entre 5 y 10 minutos antes de la hora le llega una notificación con la página, la hora, el texto y la imagen. Cada directa avisa una sola vez. |
 | D4 | Alejandro tacha la directa cuando ya la subió. | El botón "Ya la subí" marca la publicación como publicada y sale de Directas y deja de avisar. |
 | D5 | Alejandro se arrepiente y la deja como publicación normal. | "Dejar de ser directa" la quita de Directas y cancela el aviso pendiente. |

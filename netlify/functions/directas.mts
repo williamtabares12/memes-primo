@@ -33,7 +33,7 @@ export default async (req: Request) => {
     .from("publicaciones")
     .select(
       `id, hora_programada,
-       pagina:paginas(nombre),
+       pagina:paginas(nombre, nombre_tuit, usuario_tuit, avatar_url),
        imagenes!inner(id, texto, ruta_archivo)`
     )
     .eq("directa", true)
@@ -60,6 +60,9 @@ export default async (req: Request) => {
         id: fila.id,
         hora_programada: fila.hora_programada,
         pagina_nombre: pagina?.nombre ?? "",
+        nombre_tuit: pagina?.nombre_tuit,
+        usuario_tuit: pagina?.usuario_tuit,
+        avatar_url: pagina?.avatar_url,
         texto: imagen.texto ?? "",
         url_ver,
       };

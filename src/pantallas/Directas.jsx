@@ -4,6 +4,7 @@ import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import { IconoCheck, IconoCopiar, IconoReloj } from "../componentes/Iconos.jsx";
 import { ZONA_BOGOTA } from "../componentes/horasFijas.js";
+import GenerarTarjeta from "../componentes/GenerarTarjeta.jsx";
 
 // Pantalla Directas (solo Alejandro; docs/especificacion-directas.md,
 // D2, D4 y D5). Las publicaciones que se suben a mano a una hora
@@ -123,7 +124,7 @@ export default function Directas() {
         {directas.length > 0 && <span className="contador">{directas.length} por subir</span>}
       </div>
       <p style={{ fontSize: 13, marginTop: -6 }}>
-        Las que subes tú a mano. Te aviso con una notificación unos minutos antes de la hora.
+        Las que subes tú a mano. Te aviso con una notificación unos minutos antes de la hora; desde aquí mismo generas la tarjeta.
       </p>
 
       {error && <p style={{ color: "var(--error)" }}>{error}</p>}
@@ -208,6 +209,16 @@ function TarjetaDirecta({ directa, ahora, onSubida, onQuitar }) {
           </button>
         </div>
       )}
+
+      <div style={{ marginTop: 12 }}>
+        <GenerarTarjeta
+          texto={directa.texto}
+          nombreTuit={directa.nombre_tuit}
+          usuarioTuit={directa.usuario_tuit}
+          avatarUrl={directa.avatar_url}
+          nombreArchivo={`directa-${directa.id.slice(0, 8)}-${directa.pagina_nombre}`}
+        />
+      </div>
 
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <button onClick={onQuitar} className="btn btn-chico btn-secundario" style={estiloBoton}>
