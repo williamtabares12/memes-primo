@@ -5,6 +5,7 @@ import BarraInferior from "../componentes/BarraInferior.jsx";
 import { IconoCheck, IconoCopiar, IconoReloj } from "../componentes/Iconos.jsx";
 import { ZONA_BOGOTA } from "../componentes/horasFijas.js";
 import GenerarTarjeta from "../componentes/GenerarTarjeta.jsx";
+import { descargarIcs } from "../componentes/calendario.js";
 
 // Pantalla Directas (solo Alejandro; docs/especificacion-directas.md,
 // D2, D4 y D5). Las publicaciones que se suben a mano a una hora
@@ -146,6 +147,15 @@ export default function Directas() {
       </p>
 
       {error && <p style={{ color: "var(--error)" }}>{error}</p>}
+      {directas.length > 1 && (
+        <button
+          onClick={() => descargarIcs(directas, "directas")}
+          className="btn btn-chico btn-secundario"
+          style={{ alignSelf: "flex-start" }}
+        >
+          <IconoReloj /> Agregar todas al calendario
+        </button>
+      )}
       {directas.length === 0 && (
         <p>No tienes directas pendientes. Márcalas desde Por armar con "Subir directo".</p>
       )}
@@ -254,6 +264,14 @@ function TarjetaDirecta({ directa, ahora, onSubida, onQuitar }) {
           </button>
         </div>
       )}
+
+      <button
+        onClick={() => descargarIcs([directa], `directa-${directa.id.slice(0, 8)}`)}
+        className="btn btn-chico btn-secundario"
+        style={{ width: "100%", marginTop: 12 }}
+      >
+        <IconoReloj /> Agregar al calendario (con alarma)
+      </button>
 
       <div style={{ marginTop: 12 }}>
         <GenerarTarjeta
