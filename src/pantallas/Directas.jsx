@@ -27,6 +27,7 @@ export default function Directas() {
   const [directas, setDirectas] = useState([]);
   const [error, setError] = useState("");
   const [ahora, setAhora] = useState(() => Date.now());
+  const [prueba, setPrueba] = useState(null); // null | "probando" | resultado del diagnóstico
 
   const cargar = useCallback(async () => {
     const respuesta = await fetch(`/.netlify/functions/directas?codigo=${encodeURIComponent(codigo)}`);
@@ -95,6 +96,23 @@ export default function Directas() {
     }
   }
 
+  // Manda una notificación de prueba y trae el diagnóstico del aviso
+  // (netlify/functions/probar-aviso.mts), para saber por qué no llega.
+  async function probarNotificacion() {
+    setPrueba("probando");
+    try {
+      const respuesta = await fetch("/.netlify/functions/probar-aviso", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ codigo }),
+      });
+      const datos = await respuesta.json().catch(() => ({}));
+      setPrueba(respuesta.ok ? datos : { resumen: datos.error ?? "No se pudo hacer la prueba." });
+    } catch {
+      setPrueba({ resumen: "No se pudo conectar para hacer la prueba." });
+    }
+  }
+
   async function yaNoEsDirecta(id) {
     if (!window.confirm("¿Dejar de tratarla como directa? Ya no te va a avisar.")) return;
     const ok = await enviar(
@@ -142,8 +160,35 @@ export default function Directas() {
         />
       ))}
 
+      <div style={estiloPrueba}>
+        <button
+          onClick={probarNotificacion}
+          disabled={prueba === "probando"}
+          className="btn btn-chico btn-secundario"
+          style={{ alignSelf: "flex-start" }}
+        >
+          {prueba === "probando" ? "Probando…" : "Probar notificación"}
+        </button>
+        {prueba && prueba !== "probando" && <ResultadoPrueba datos={prueba} />}
+      </div>
+
       <BarraInferior usuario="alejandro" codigo={codigo} />
     </Pantalla>
+  );
+}
+
+function ResultadoPrueba({ datos }) {
+  return (
+    <div style={estiloResultado}>
+      <p style={{ margin: 0, color: "var(--text-h)" }}>{datos.resumen}</p>
+      {datos.ntfy_error && <p style={{ margin: 0 }}>ntfy respondió: {datos.ntfy_error}</p>}
+      {datos.directas_error && <p style={{ margin: 0 }}>Error leyendo directas: {datos.directas_error}</p>}
+      {datos.directas_pendientes?.map((d, i) => (
+        <p key={i} style={{ margin: 0 }}>
+          {d.pagina}, {new Date(d.hora_programada).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit", timeZone: ZONA_BOGOTA })}: {d.estado}
+        </p>
+      ))}
+    </div>
   );
 }
 
@@ -231,6 +276,24 @@ function TarjetaDirecta({ directa, ahora, onSubida, onQuitar }) {
     </div>
   );
 }
+
+const estiloPrueba = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+  marginTop: 8,
+};
+
+const estiloResultado = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 4,
+  fontSize: 13,
+  padding: 12,
+  borderRadius: "var(--radio)",
+  background: "var(--bg-elevada)",
+  border: "1px solid var(--border-suave)",
+};
 
 const estiloEncabezado = {
   display: "flex",

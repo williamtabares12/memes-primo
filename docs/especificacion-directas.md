@@ -24,6 +24,7 @@ La app ya guarda una hora por página (`hora_programada`, la que David escribe a
 | D3 | Alejandro recibe un aviso antes de la hora, con el meme. | Entre 5 y 10 minutos antes de la hora le llega una notificación con la página, la hora, el texto y la imagen. Cada directa avisa una sola vez. |
 | D4 | Alejandro tacha la directa cuando ya la subió. | El botón "Ya la subí" marca la publicación como publicada y sale de Directas y deja de avisar. |
 | D5 | Alejandro se arrepiente y la deja como publicación normal. | "Dejar de ser directa" la quita de Directas y cancela el aviso pendiente. |
+| D6 | Alejandro comprueba que el aviso funciona, sin esperar a un meme real. | El botón Probar notificación de la pestaña Directas manda una notificación de prueba y muestra un diagnóstico: si la función ve el tema, qué contesta ntfy y en qué estado está cada directa pendiente. Nunca muestra el tema. |
 
 ## Datos que cambian
 

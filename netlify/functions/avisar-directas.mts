@@ -18,6 +18,7 @@ import type { Config } from "@netlify/functions";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { clienteDb } from "./_lib/db.mts";
+import { enviarNtfy } from "./_lib/ntfy.mts";
 import { bucketR2, clienteR2 } from "./_lib/r2.mts";
 
 const MINUTOS_ANTES = 10;
@@ -25,36 +26,6 @@ const MINUTOS_DESPUES = 30;
 const SEGUNDOS_VALIDEZ_URL = 6 * 3600; // la notificación se puede abrir un rato después
 const LARGO_MINIMO_TEMA = 16;
 const ZONA_BOGOTA = "America/Bogota";
-
-type ResultadoEnvio = { ok: boolean; descripcion?: string };
-
-async function enviarNtfy(
-  tema: string,
-  aviso: { titulo: string; mensaje: string; imagen: string }
-): Promise<ResultadoEnvio> {
-  try {
-    // Publicación por JSON: el tema va en el cuerpo (no en la URL) y los
-    // acentos viajan bien en título y mensaje.
-    const res = await fetch("https://ntfy.sh", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        topic: tema,
-        title: aviso.titulo,
-        message: aviso.mensaje,
-        priority: 4,
-        tags: ["alarm_clock"],
-        attach: aviso.imagen,
-        filename: "meme.jpg",
-      }),
-    });
-    return { ok: res.ok, descripcion: res.ok ? undefined : `HTTP ${res.status}` };
-  } catch (err) {
-    // Sin err.message completo, por si trae la URL.
-    const causa = (err as { cause?: { code?: string } })?.cause?.code ?? "sin detalle";
-    return { ok: false, descripcion: `error de red (${causa})` };
-  }
-}
 
 function armarAviso(pagina: string, hora: Date, ahora: number, textoMeme: string) {
   const minutos = Math.round((hora.getTime() - ahora) / 60000);
@@ -109,6 +80,8 @@ export default async () => {
     console.error("avisar-directas: no se pudo consultar:", error.message);
     return new Response("error");
   }
+
+  console.log(`avisar-directas: ${filas?.length ?? 0} directa(s) dentro de la ventana de aviso.`);
 
   const r2 = clienteR2();
   const bucket = bucketR2();
