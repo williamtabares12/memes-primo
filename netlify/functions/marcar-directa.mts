@@ -3,7 +3,7 @@
 //
 // Solo Alejandro (docs/especificacion-directas.md, D1 y D5): marca o
 // desmarca una publicación como "directa" (se sube a mano a la hora
-// indicada, con aviso por Telegram). hora_programada es opcional y
+// indicada, con aviso por notificación). hora_programada es opcional y
 // permite cambiar la hora al marcarla. Cualquier cambio de hora o
 // volver a marcarla vacía aviso_enviado_en para que avise otra vez.
 

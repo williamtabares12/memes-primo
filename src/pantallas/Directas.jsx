@@ -58,7 +58,7 @@ export default function Directas() {
   useEffect(() => {
     const reloj = setInterval(() => setAhora(Date.now()), MS_RELOJ);
     const recarga = setInterval(() => cargar().catch(() => {}), MS_RECARGA);
-    // Al volver desde Telegram o de otra app, que se vea lo último.
+    // Al volver desde la notificación o de otra app, que se vea lo último.
     function alVolver() {
       if (document.visibilityState === "visible") {
         setAhora(Date.now());
@@ -123,7 +123,7 @@ export default function Directas() {
         {directas.length > 0 && <span className="contador">{directas.length} por subir</span>}
       </div>
       <p style={{ fontSize: 13, marginTop: -6 }}>
-        Las que subes tú a mano. Te aviso por Telegram unos minutos antes de la hora.
+        Las que subes tú a mano. Te aviso con una notificación unos minutos antes de la hora.
       </p>
 
       {error && <p style={{ color: "var(--error)" }}>{error}</p>}

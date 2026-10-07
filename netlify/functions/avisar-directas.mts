@@ -3,13 +3,16 @@
 //
 // docs/especificacion-directas.md, D3: busca las publicaciones directas
 // pendientes cuya hora cae en los próximos 10 minutos (o se pasó hace
-// menos de 30) y le manda a Alejandro la imagen por Telegram. Cada
-// directa avisa una sola vez: si Telegram responde bien se anota
+// menos de 30) y le manda a Alejandro una notificación con la imagen
+// por ntfy (https://ntfy.sh: gratis, sin cuenta, con app para iPhone).
+// Cada directa avisa una sola vez: si ntfy responde bien se anota
 // aviso_enviado_en; si falla no se anota nada y se reintenta en la
 // corrida siguiente.
 //
-// Variables de entorno: TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID. Sin
-// ellas no hace nada. El token nunca se escribe en los logs.
+// Variable de entorno: NTFY_TOPIC. En ntfy público el nombre del tema
+// es lo único que protege las notificaciones (quien lo sepa puede
+// leerlas), así que tiene que ser largo y al azar; si es corto no se
+// manda nada. Sin la variable tampoco se manda.
 
 import type { Config } from "@netlify/functions";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
@@ -19,33 +22,41 @@ import { bucketR2, clienteR2 } from "./_lib/r2.mts";
 
 const MINUTOS_ANTES = 10;
 const MINUTOS_DESPUES = 30;
-const SEGUNDOS_VALIDEZ_URL = 3600; // Telegram descarga la imagen casi al instante
-const LIMITE_CAPTION = 1024; // tope de Telegram para el texto de una foto
+const SEGUNDOS_VALIDEZ_URL = 6 * 3600; // la notificación se puede abrir un rato después
+const LARGO_MINIMO_TEMA = 16;
 const ZONA_BOGOTA = "America/Bogota";
 
-type ResultadoTelegram = { ok: boolean; descripcion?: string };
+type ResultadoEnvio = { ok: boolean; descripcion?: string };
 
-async function llamarTelegram(
-  token: string,
-  metodo: "sendPhoto" | "sendMessage",
-  cuerpo: Record<string, unknown>
-): Promise<ResultadoTelegram> {
+async function enviarNtfy(
+  tema: string,
+  aviso: { titulo: string; mensaje: string; imagen: string }
+): Promise<ResultadoEnvio> {
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/${metodo}`, {
+    // Publicación por JSON: el tema va en el cuerpo (no en la URL) y los
+    // acentos viajan bien en título y mensaje.
+    const res = await fetch("https://ntfy.sh", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(cuerpo),
+      body: JSON.stringify({
+        topic: tema,
+        title: aviso.titulo,
+        message: aviso.mensaje,
+        priority: 4,
+        tags: ["alarm_clock"],
+        attach: aviso.imagen,
+        filename: "meme.jpg",
+      }),
     });
-    const datos = (await res.json().catch(() => ({}))) as { ok?: boolean; description?: string };
-    return { ok: res.ok && datos.ok === true, descripcion: datos.description };
+    return { ok: res.ok, descripcion: res.ok ? undefined : `HTTP ${res.status}` };
   } catch (err) {
-    // Sin err.message completo: podría traer la URL, y la URL lleva el token.
+    // Sin err.message completo, por si trae la URL.
     const causa = (err as { cause?: { code?: string } })?.cause?.code ?? "sin detalle";
     return { ok: false, descripcion: `error de red (${causa})` };
   }
 }
 
-function armarTexto(pagina: string, hora: Date, ahora: number, textoMeme: string): string {
+function armarAviso(pagina: string, hora: Date, ahora: number, textoMeme: string) {
   const minutos = Math.round((hora.getTime() - ahora) / 60000);
   const cuando = minutos > 0 ? `en ${minutos} min` : "ya es la hora";
   const horaLegible = hora.toLocaleTimeString("es-CO", {
@@ -53,18 +64,24 @@ function armarTexto(pagina: string, hora: Date, ahora: number, textoMeme: string
     minute: "2-digit",
     timeZone: ZONA_BOGOTA,
   });
-  const encabezado = `Subir directo: ${pagina}\n${horaLegible} (${cuando})`;
   const cuerpo = textoMeme.trim() ? `\n\n${textoMeme.trim()}` : "";
-  const completo = encabezado + cuerpo;
-  return completo.length <= LIMITE_CAPTION ? completo : `${completo.slice(0, LIMITE_CAPTION - 1)}…`;
+  return {
+    titulo: `Subir directo: ${pagina}`,
+    mensaje: `${horaLegible} (${cuando})${cuerpo}`.slice(0, 1500),
+  };
 }
 
 export default async () => {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) {
-    console.warn("avisar-directas: faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID, no se avisa.");
-    return new Response("sin telegram");
+  const tema = process.env.NTFY_TOPIC?.trim();
+  if (!tema) {
+    console.warn("avisar-directas: falta NTFY_TOPIC, no se avisa.");
+    return new Response("sin ntfy");
+  }
+  if (tema.length < LARGO_MINIMO_TEMA) {
+    console.error(
+      `avisar-directas: NTFY_TOPIC es muy corto (menos de ${LARGO_MINIMO_TEMA} caracteres); no se avisa para no dejar los memes en un tema adivinable.`
+    );
+    return new Response("tema corto");
   }
 
   const ahora = Date.now();
@@ -100,7 +117,7 @@ export default async () => {
   for (const fila of filas ?? []) {
     const imagen = Array.isArray(fila.imagenes) ? fila.imagenes[0] : fila.imagenes;
     const pagina = Array.isArray(fila.pagina) ? fila.pagina[0] : fila.pagina;
-    const texto = armarTexto(
+    const aviso = armarAviso(
       pagina?.nombre ?? "página sin nombre",
       new Date(fila.hora_programada as string),
       ahora,
@@ -113,21 +130,7 @@ export default async () => {
       { expiresIn: SEGUNDOS_VALIDEZ_URL }
     );
 
-    let resultado = await llamarTelegram(token, "sendPhoto", {
-      chat_id: chatId,
-      photo: urlImagen,
-      caption: texto,
-    });
-
-    // Si Telegram no pudo traer la imagen, mejor un aviso sin foto que
-    // ningún aviso: lo importante es acordarse de la hora y la página.
-    if (!resultado.ok) {
-      console.warn(`avisar-directas: sendPhoto falló (${resultado.descripcion}), va solo texto.`);
-      resultado = await llamarTelegram(token, "sendMessage", {
-        chat_id: chatId,
-        text: `${texto}\n\n(No se pudo adjuntar la imagen; está en Directas.)`.slice(0, 4096),
-      });
-    }
+    const resultado = await enviarNtfy(tema, { ...aviso, imagen: urlImagen });
 
     if (!resultado.ok) {
       console.error(`avisar-directas: no se pudo avisar ${fila.id}: ${resultado.descripcion}`);

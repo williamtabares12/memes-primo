@@ -12,7 +12,7 @@ import SelectorHoraProgramada from "../componentes/SelectorHoraProgramada.jsx";
 // fila trae el texto (editable, con copiar) y la hora programada por
 // página. Alejandro la quita de la lista cuando ya terminó con ella.
 // Además, solo Alejandro puede marcar una página como "directa" (se
-// sube a mano a esa hora, con aviso por Telegram; ver
+// sube a mano a esa hora, con aviso por notificación; ver
 // docs/especificacion-directas.md).
 
 const ESTADO_VALIDANDO = "validando";
@@ -273,7 +273,7 @@ function TarjetaPorArmar({
                       checked={!!p.directa}
                       onChange={(evento) => onMarcarDirecta(p.id, evento.target.checked)}
                     />
-                    Subir directo (te aviso por Telegram)
+                    Subir directo (te aviso con una notificación)
                   </label>
                 ) : (
                   <span style={estiloHora}>Elige la hora para marcarla como directa:</span>
