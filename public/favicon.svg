@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <rect width="48" height="48" rx="12" fill="#1d1f20" />
-  <text x="24" y="33" text-anchor="middle" font-family="'Libre Baskerville', Georgia, serif" font-size="28" font-weight="700" fill="#ffffff">G</text>
-  <circle cx="37" cy="12" r="3.2" fill="#00d0ff" />
+  <rect width="48" height="48" rx="11" fill="#1d1d1f" />
+  <text x="24" y="34" text-anchor="middle" font-family="-apple-system, 'SF Pro Display', Inter, Helvetica, Arial, sans-serif" font-size="28" font-weight="600" fill="#f5f5f7">G</text>
+  <circle cx="37" cy="12" r="3.2" fill="#0071e3" />
 </svg>

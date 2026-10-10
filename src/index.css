@@ -1,36 +1,41 @@
+/* Estilo visual tomado de la referencia "Apple — white room with a single
+   blue switch": lienzo gris casi blanco, tinta carbón, un solo azul para
+   la acción, píldoras de 980px, bordes finos en vez de sombras.
+   Solo afecta la interfaz; la tarjeta que se genera (GenerarTarjeta.jsx)
+   dibuja en canvas con su propia tipografía y no usa estas variables. */
 :root {
-  /* Paleta tomada de DESIGN.md ("Captions — sunlit editing desk"):
-     canvas papel-blanco, superficies celeste-pálido para lo elevado,
-     tinta carbón para texto fuerte y cian como único acento de
-     selección (nunca como relleno genérico de botón). */
-  --text: #7e8486; /* Ash Copy */
-  --text-medio: #434647; /* Graphite Copy */
-  --text-h: #1d1f20; /* Charcoal */
-  --bg: #fff; /* Paper White */
-  --bg-suave: #effbff; /* Air Wash */
+  --text: #707070; /* Ash */
+  --text-medio: #474747; /* Graphite */
+  --text-h: #1d1d1f; /* Carbon */
+  --bg: #ffffff;
+  --bg-suave: #f5f5f7; /* Frost: lienzo de la página */
   --bg-elevada: #ffffff;
-  --border: #d0d6d7; /* Steel Inset */
-  --border-suave: #e8eff2; /* Mist Border */
-  --accent: #1d1f20; /* Charcoal — acción principal (Dark Ink Button) */
-  --accent-h: #000000;
-  --accent-bg: #ccf6ff; /* Cyan Halo */
-  --cian: #00d0ff; /* Prism Cyan — solo para estados seleccionados */
-  --error: #c62828;
-  --error-bg: rgba(198, 40, 40, 0.08);
-  --exito: #2e7d32;
-  --exito-bg: rgba(46, 125, 50, 0.08);
+  --border: #d2d2d7;
+  --border-suave: #e5e5ea;
+  --accent: #0071e3; /* Apple Blue: relleno de acción principal */
+  --accent-h: #0077ed;
+  --enlace: #0066cc; /* Link Blue: texto, borde de acción secundaria, activo */
+  --accent-bg: #e8f1fc;
+  --error: #d70015;
+  --error-bg: rgba(215, 0, 21, 0.08);
+  --exito: #248a3d;
+  --exito-bg: rgba(36, 138, 61, 0.1);
 
-  --radio: 12px;
-  --radio-chico: 10px;
-  --radio-imagen: 20px;
-  --sombra: rgba(0, 0, 0, 0.05) 0 4px 10px 0, rgb(208, 214, 215) 0 0 0 0.5px inset;
-  --sombra-flotante: 0 8px 24px rgba(29, 31, 32, 0.14);
+  --radio: 8px;
+  --radio-chico: 8px;
+  --radio-imagen: 8px;
+  --pildora: 980px;
+  --sombra: none;
+  --sombra-flotante: 0 0 0 0.5px rgba(0, 0, 0, 0.12);
   --transicion: 140ms ease;
 
-  --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --serif: 'Libre Baskerville', Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', ui-sans-serif, system-ui,
+    'Segoe UI', Roboto, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', ui-sans-serif,
+    system-ui, 'Segoe UI', Roboto, sans-serif;
 
-  font: 16px/145% var(--sans);
+  font: 17px/1.47 var(--sans);
+  letter-spacing: -0.016em;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg-suave);
@@ -39,26 +44,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #a8aeb0;
-    --text-medio: #c4c8c9;
-    --text-h: #f5f7f8;
-    --bg: #1d1f20; /* Charcoal Surface */
-    --bg-suave: #161718;
-    --bg-elevada: #262829;
-    --border: #3a3d3e;
-    --border-suave: #2c2e2f;
-    --accent: #f5f7f8;
-    --accent-h: #ffffff;
-    --accent-bg: rgba(0, 208, 255, 0.16);
-    --cian: #3fdcff;
-    --error: #ef5350;
-    --error-bg: rgba(239, 83, 80, 0.12);
-    --exito: #66bb6a;
-    --exito-bg: rgba(102, 187, 106, 0.12);
-    --sombra: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.35);
-    --sombra-flotante: 0 8px 28px rgba(0, 0, 0, 0.5);
+    --text: #a1a1a6;
+    --text-medio: #c7c7cc;
+    --text-h: #f5f5f7;
+    --bg: #000000;
+    --bg-suave: #000000;
+    --bg-elevada: #1d1d1f;
+    --border: #424245;
+    --border-suave: #333336;
+    --accent: #0071e3;
+    --accent-h: #147ce5;
+    --enlace: #2997ff;
+    --accent-bg: rgba(41, 151, 255, 0.16);
+    --error: #ff453a;
+    --error-bg: rgba(255, 69, 58, 0.14);
+    --exito: #30d158;
+    --exito-bg: rgba(48, 209, 88, 0.14);
+    --sombra-flotante: 0 0 0 0.5px rgba(255, 255, 255, 0.14);
   }
-
 }
 
 * {
@@ -77,18 +80,20 @@ body {
 h1,
 h2 {
   color: var(--text-h);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-family: var(--display);
+  font-weight: 600;
 }
 
 h1 {
-  font: 700 25px/1.15 var(--serif);
-  letter-spacing: -0.3px;
+  font: 600 28px/1.14 var(--display);
+  letter-spacing: -0.02em;
   margin: 0;
 }
 
 h2 {
-  font-size: 17px;
+  font-size: 21px;
+  line-height: 1.24;
+  letter-spacing: -0.012em;
 }
 
 button,
@@ -99,7 +104,7 @@ select {
 }
 
 a {
-  color: var(--accent);
+  color: var(--enlace);
 }
 
 /* Barra superior con el contador y los enlaces de navegación,
@@ -114,7 +119,9 @@ a {
   gap: 8px;
   padding: 10px 0;
   margin: -4px 0 4px;
-  background: linear-gradient(var(--bg-suave) 78%, transparent);
+  background: color-mix(in srgb, var(--bg-suave) 82%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
 }
 
 .nav-enlaces {
@@ -125,10 +132,10 @@ a {
 }
 
 .chip {
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 6px 14px;
+  border-radius: var(--pildora);
   background: var(--bg-elevada);
   border: 1px solid var(--border);
   color: var(--text-medio);
@@ -138,25 +145,18 @@ a {
 }
 
 .chip:hover {
-  border-color: var(--cian);
-  color: var(--text-h);
+  border-color: var(--enlace);
+  color: var(--enlace);
 }
 
 .contador {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: var(--pildora);
   background: var(--accent-bg);
-  color: #006c82;
-  box-shadow: 0 0 0 0.5px rgba(0, 208, 255, 0.35) inset;
+  color: var(--enlace);
   white-space: nowrap;
-}
-
-@media (prefers-color-scheme: dark) {
-  .contador {
-    color: var(--cian);
-  }
 }
 
 /* Botones */
@@ -166,8 +166,9 @@ a {
   justify-content: center;
   gap: 6px;
   border: none;
-  border-radius: var(--radio-chico);
-  font-weight: 700;
+  border-radius: var(--pildora);
+  font-weight: 400;
+  letter-spacing: -0.016em;
   cursor: pointer;
   transition: transform var(--transicion), filter var(--transicion), opacity var(--transicion),
     box-shadow var(--transicion);
@@ -179,7 +180,7 @@ a {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--cian);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -189,45 +190,33 @@ a {
 }
 
 .btn:hover:not(:disabled) {
-  filter: brightness(1.06);
+  filter: brightness(1.04);
 }
 
 .btn-grande {
-  padding: 15px 18px;
-  font-size: 16px;
-  border-radius: var(--radio);
+  padding: 13px 22px;
+  font-size: 17px;
+  border-radius: var(--pildora);
 }
 
 .btn-chico {
-  padding: 10px 14px;
+  padding: 9px 16px;
   font-size: 14px;
 }
 
 .btn-primario {
   background: var(--accent);
-  color: #fff;
-  box-shadow: rgba(0, 0, 0, 0.05) 0 4px 10px 0;
+  color: #f4f8fb;
 }
 
 .btn-primario:hover:not(:disabled) {
   background: var(--accent-h);
 }
 
-/* En oscuro --accent pasa a ser casi blanco (botón claro sobre fondo
-   carbón), así que el texto tiene que volver a carbón; si no, queda
-   texto claro sobre fondo claro y no se lee. Va después de la regla
-   base para ganarle en la cascada (misma especificidad, pero esta
-   es la que aparece más abajo en el archivo). */
-@media (prefers-color-scheme: dark) {
-  .btn-primario {
-    color: #1d1f20;
-  }
-}
-
 .btn-secundario {
-  background: var(--bg-elevada);
-  color: var(--text-h);
-  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--enlace);
+  border: 1px solid var(--enlace);
 }
 
 .btn-peligro {
@@ -240,15 +229,12 @@ a {
   color: var(--exito);
 }
 
-/* Tarjetas: planas, con el borde fino en vez de sombra marcada
-   (DESIGN.md: "cards are predominantly flat with borders or an
-   inset edge, not broad dark shadows"). */
+/* Tarjetas: planas, borde fino y sin sombra. */
 .tarjeta {
   background: var(--bg-elevada);
   border: 1px solid var(--border-suave);
   border-radius: var(--radio);
-  box-shadow: rgb(208, 214, 215) 0 0 0 0.5px inset;
-  padding: 14px;
+  padding: 16px;
 }
 
 .tarjeta img {
@@ -261,7 +247,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-h);
   font-size: 14px;
 }
@@ -271,7 +257,7 @@ input[type='date'],
 input[type='datetime-local'],
 textarea,
 select {
-  padding: 10px 12px;
+  padding: 11px 14px;
   border-radius: var(--radio-chico);
   border: 1px solid var(--border);
   background: var(--bg-elevada);
@@ -285,8 +271,8 @@ input[type='datetime-local']:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--cian);
-  box-shadow: 0 0 0 3px rgba(0, 208, 255, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 textarea {
@@ -304,8 +290,8 @@ textarea {
   stroke-linejoin: round;
 }
 
-/* Marca de la app: Gconted - El Queru S.A.S. Serif para el nombre,
-   igual que los títulos; la razón social va chica y en gris. */
+/* Marca de la app: Gconted - El Queru S.A.S. El nombre va en peso 600 y
+   la razón social chica y en gris, separadas por un filete fino. */
 .marca {
   display: flex;
   align-items: baseline;
@@ -319,7 +305,8 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font: 700 17px/1 var(--serif);
+  font: 600 17px/1 var(--display);
+  letter-spacing: -0.016em;
   color: var(--text-h);
 }
 
@@ -328,12 +315,11 @@ textarea {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--cian);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cian) 25%, transparent);
+  background: var(--accent);
 }
 
 .marca-empresa {
-  font: 500 12px/1 var(--sans);
-  letter-spacing: 0.02em;
+  font: 400 12px/1 var(--sans);
+  letter-spacing: -0.022em;
   color: var(--text);
 }

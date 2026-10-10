@@ -50,10 +50,10 @@ export default function BarraInferior({ usuario, codigo }) {
           <Link
             key={ruta}
             to={`${ruta}?codigo=${encodeURIComponent(codigo)}`}
-            style={{ ...estiloPestana, color: activa ? "var(--cian)" : "var(--text)" }}
+            style={{ ...estiloPestana, color: activa ? "var(--enlace)" : "var(--text)" }}
           >
             <Icono style={{ opacity: activa ? 1 : 0.75 }} />
-            <span style={{ fontSize: pestanas.length > 4 ? 10 : 11, fontWeight: activa ? 700 : 600 }}>
+            <span style={{ fontSize: pestanas.length > 4 ? 10 : 11, fontWeight: activa ? 600 : 400 }}>
               {etiqueta}
             </span>
           </Link>
@@ -63,9 +63,8 @@ export default function BarraInferior({ usuario, codigo }) {
   );
 }
 
-// Repisa flotante traslúcida, como el header del DESIGN.md pero
-// anclada abajo: vidrio esmerilado sobre el contenido en vez de un
-// panel opaco pegado al borde.
+// Barra inferior traslúcida: vidrio esmerilado con filete fino arriba,
+// sin sombra ni esquinas redondeadas.
 const estiloBarra = {
   position: "fixed",
   left: "50%",
@@ -75,11 +74,9 @@ const estiloBarra = {
   maxWidth: 480,
   display: "flex",
   background: "color-mix(in srgb, var(--bg-elevada) 88%, transparent)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
+  backdropFilter: "saturate(180%) blur(20px)",
+  WebkitBackdropFilter: "saturate(180%) blur(20px)",
   borderTop: "1px solid var(--border-suave)",
-  borderRadius: "20px 20px 0 0",
-  boxShadow: "var(--sombra-flotante)",
   paddingBottom: "env(safe-area-inset-bottom, 0px)",
   zIndex: 10,
 };
