@@ -2,10 +2,11 @@
 // Body: { codigo, imagen_id, texto }
 //
 // H2: el texto se puede editar tanto en Revisar como en Por armar,
-// por David o por Alejandro.
+// por David, por Alejandro o por Wilson (solo en lo de sus páginas).
 
 import { identificarUsuario, respuestaNoAutorizado } from "./_lib/auth.mts";
 import { clienteDb } from "./_lib/db.mts";
+import { idsDePaginasPermitidas } from "./_lib/acceso.mts";
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
@@ -35,6 +36,24 @@ export default async (req: Request) => {
   }
 
   const db = clienteDb();
+
+  // Wilson solo edita el texto de imágenes elegidas para sus páginas.
+  const permitidas = await idsDePaginasPermitidas(db, usuario);
+  if (permitidas) {
+    const { data: propias } = await db
+      .from("publicaciones")
+      .select("id")
+      .eq("imagen_id", cuerpo.imagen_id)
+      .in("pagina_id", permitidas)
+      .limit(1);
+    if (!propias || propias.length === 0) {
+      return new Response(JSON.stringify({ error: "Esa imagen no es de tus páginas." }), {
+        status: 403,
+        headers: { "content-type": "application/json" },
+      });
+    }
+  }
+
   const { error } = await db
     .from("imagenes")
     .update({ texto: cuerpo.texto ?? "" })

@@ -15,7 +15,7 @@ import {
 // Barra de navegación fija abajo, como en una app de celular, para
 // no depender de que cada quien recuerde/escriba la URL de cada
 // pantalla. Las pestañas dependen del usuario: Alejandro sube y
-// arma, David revisa, guarda y arma.
+// arma, David revisa, guarda y arma, Wilson sube y arma lo suyo.
 
 const PESTANAS_POR_USUARIO = {
   alejandro: [
@@ -23,6 +23,11 @@ const PESTANAS_POR_USUARIO = {
     { ruta: "/preseleccion", etiqueta: "Preselección", Icono: IconoElegir },
     { ruta: "/armar", etiqueta: "Por armar", Icono: IconoLista },
     { ruta: "/directas", etiqueta: "Directas", Icono: IconoReloj },
+    { ruta: "/tarjeta-libre", etiqueta: "Tarjeta", Icono: IconoImagen },
+  ],
+  wilson: [
+    { ruta: "/subir", etiqueta: "Subir", Icono: IconoSubir },
+    { ruta: "/armar", etiqueta: "Por armar", Icono: IconoLista },
     { ruta: "/tarjeta-libre", etiqueta: "Tarjeta", Icono: IconoImagen },
   ],
   david: [

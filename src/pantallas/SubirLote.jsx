@@ -26,6 +26,7 @@ export default function SubirLote() {
   const [archivos, setArchivos] = useState([]);
   const [progreso, setProgreso] = useState({ hechas: 0, total: 0 });
   const [errores, setErrores] = useState([]);
+  const [usuario, setUsuario] = useState(null);
   const inputArchivosRef = useRef(null);
 
   useEffect(() => {
@@ -36,7 +37,9 @@ export default function SubirLote() {
     fetch(`/.netlify/functions/quien-soy?codigo=${encodeURIComponent(codigo)}`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((datos) => {
-        setEstado(datos.usuario === "alejandro" ? ESTADO_LISTO : ESTADO_ENLACE_INVALIDO);
+        const puedeSubir = datos.usuario === "alejandro" || datos.usuario === "wilson";
+        setUsuario(puedeSubir ? datos.usuario : null);
+        setEstado(puedeSubir ? ESTADO_LISTO : ESTADO_ENLACE_INVALIDO);
       })
       .catch(() => setEstado(ESTADO_ENLACE_INVALIDO));
   }, [codigo]);
@@ -189,7 +192,7 @@ export default function SubirLote() {
         >
           Ir a Por armar
         </Link>
-        <BarraInferior usuario="alejandro" codigo={codigo} />
+        <BarraInferior usuario={usuario} codigo={codigo} />
       </Pantalla>
     );
   }
@@ -269,7 +272,7 @@ export default function SubirLote() {
           </>
         )}
       </button>
-      <BarraInferior usuario="alejandro" codigo={codigo} />
+      <BarraInferior usuario={usuario} codigo={codigo} />
     </Pantalla>
   );
 }

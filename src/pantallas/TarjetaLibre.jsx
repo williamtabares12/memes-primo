@@ -4,7 +4,7 @@ import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import GenerarTarjeta from "../componentes/GenerarTarjeta.jsx";
 
-// Pantalla Tarjeta libre (solo Alejandro). Para cuando David manda un
+// Pantalla Tarjeta libre (Alejandro y Wilson). Para cuando David manda un
 // texto o una imagen por fuera de la cola normal de Por armar y
 // Alejandro solo necesita la tarjeta con formato de tuit, sin tener
 // que esperar a que exista una pieza "elegida" en la base de datos.
@@ -23,6 +23,7 @@ export default function TarjetaLibre() {
   const [paginas, setPaginas] = useState([]);
   const [paginaId, setPaginaId] = useState("");
   const [texto, setTexto] = useState("");
+  const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
     if (!codigo) {
@@ -33,6 +34,7 @@ export default function TarjetaLibre() {
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((datos) => {
         setPaginas(datos.paginas);
+        setUsuario(datos.usuario);
         if (datos.paginas.length > 0) setPaginaId(datos.paginas[0].id);
         setEstado(ESTADO_LISTO);
       })
@@ -95,7 +97,7 @@ export default function TarjetaLibre() {
         </>
       )}
 
-      <BarraInferior usuario="alejandro" codigo={codigo} />
+      <BarraInferior usuario={usuario} codigo={codigo} />
     </Pantalla>
   );
 }

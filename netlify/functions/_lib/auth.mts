@@ -4,13 +4,13 @@
 // 401 si viene null.
 //
 // No hay usuario ni clave: el código en la URL ES la credencial.
-// LINK_CODE_ALEJANDRO y LINK_CODE_DAVID se guardan como variables de
+// LINK_CODE_ALEJANDRO, LINK_CODE_DAVID y LINK_CODE_WILSON se guardan como variables de
 // entorno (en .env local y en Netlify para producción) y nunca se
 // escriben en el código.
 
 import { timingSafeEqual } from "node:crypto";
 
-export type Usuario = "alejandro" | "david";
+export type Usuario = "alejandro" | "david" | "wilson";
 
 // Compara con tiempo constante para no filtrar el código por cuánto
 // tarda la respuesta. Si algún día se filtra igual, se rota el
@@ -24,7 +24,7 @@ function coincide(a: string, b: string): boolean {
 
 /**
  * Recibe el código que viene en la URL (`?codigo=...`) y dice de
- * quién es, o null si no coincide con ninguno de los dos o si las
+ * quién es, o null si no coincide con ninguno o si las
  * variables de entorno no están configuradas.
  */
 export function identificarUsuario(codigo: string | null): Usuario | null {
@@ -32,9 +32,11 @@ export function identificarUsuario(codigo: string | null): Usuario | null {
 
   const deAlejandro = process.env.LINK_CODE_ALEJANDRO;
   const deDavid = process.env.LINK_CODE_DAVID;
+  const deWilson = process.env.LINK_CODE_WILSON;
 
   if (deAlejandro && coincide(codigo, deAlejandro)) return "alejandro";
   if (deDavid && coincide(codigo, deDavid)) return "david";
+  if (deWilson && coincide(codigo, deWilson)) return "wilson";
   return null;
 }
 

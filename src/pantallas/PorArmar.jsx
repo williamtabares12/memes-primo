@@ -253,7 +253,7 @@ function TarjetaPorArmar({
                   </div>
                 )}
               </div>
-              {usuario === "alejandro" && (
+              {(usuario === "alejandro" || usuario === "wilson") && (
                 <GenerarTarjeta
                   texto={texto}
                   nombreTuit={p.nombre_tuit}

@@ -1,7 +1,7 @@
 // POST /.netlify/functions/subir-lote
 // Body: { codigo, fuente, archivos: [{ nombre, tipo }] }
 //
-// Solo Alejandro sube lotes (H1). Crea la fila del lote, una fila
+// Alejandro y Wilson suben lotes (H1, T2). Crea la fila del lote, una fila
 // por imagen (estado "nueva") y devuelve una URL firmada por
 // archivo para que el navegador suba directo a R2 sin pasar por
 // Netlify. Cada URL vale por 10 minutos.
@@ -58,8 +58,8 @@ export default async (req: Request) => {
 
   const usuario = identificarUsuario(cuerpo.codigo ?? null);
   if (!usuario) return respuestaNoAutorizado();
-  if (usuario !== "alejandro") {
-    return respuestaError("Solo Alejandro sube lotes.", 403);
+  if (usuario !== "alejandro" && usuario !== "wilson") {
+    return respuestaError("Solo Alejandro y Wilson suben lotes.", 403);
   }
 
   const fuente = cuerpo.fuente?.trim();

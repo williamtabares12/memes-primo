@@ -22,7 +22,7 @@ Un primo, Wilson, se suma al trabajo y hará lo mismo que Alejandro, pero para o
 | T1 | Wilson entra con su enlace privado. | Con su código ve solo las pestañas Subir, Por armar y Tarjeta. Con un código incorrecto ve Enlace no válido, igual que hoy. |
 | T2 | Wilson sube lotes de imágenes. | La subida funciona igual que la de Alejandro. Las imágenes quedan registradas como suyas. |
 | T3 | David elige cualquier imagen para cualquier página. | En Revisar, la lista de páginas al elegir muestra todas las visibles, sin importar quién subió la imagen. Una imagen de Wilson puede ir a El Chanty o El Traveler, y una de Alejandro a las de Wilson. |
-| T4 | Wilson ve y arma lo de sus páginas. | En Por armar ve las imágenes elegidas para Jordan Hurtado o Hillary, mostrando solo las filas de esas dos páginas. Puede generar la tarjeta, subir la captura, marcar Armada y marcar Publicada en sus páginas. No ve filas de El Chanty ni de El Traveler. |
+| T4 | Wilson ve y arma lo de sus páginas. | En Por armar ve las imágenes elegidas para Jordan Hurtado o Hillary, mostrando solo las filas de esas dos páginas. Puede generar la tarjeta y editar el texto. Marcar una página como publicada está permitido en el servidor solo para sus páginas, pero Por armar no tiene hoy ese botón para nadie: la marca se hace desde Directas (solo Alejandro). Si se quiere el botón, es una mejora aparte. No ve filas de El Chanty ni de El Traveler. |
 | T5 | Alejandro cubre a Wilson si hace falta. | Por armar de Alejandro muestra todas las filas, incluidas las de Jordan Hurtado y Hillary, y puede marcarlas como publicadas. Se marca quién la publicó. |
 | T6 | Wilson genera tarjetas para sus páginas. | La pestaña Tarjeta lista solo Jordan Hurtado y Hillary, con su identidad de tuit (nombre, usuario, avatar). La de Alejandro las lista todas. |
 | T7 | Wilson no puede tocar lo que no es suyo. | Todas las funciones comprueban en el servidor que la página sea suya. No basta con esconderlo en pantalla: un enlace de Wilson no puede leer ni cambiar filas de otras páginas. |
@@ -69,6 +69,7 @@ No existe una pantalla Páginas. La historia H9 (David agrega, renombra y oculta
 
 ## Riesgos y preguntas abiertas
 
+- [x] Hecho el 9 de oct: se revisaron todas las funciones y se probó con datos simulados (28 comprobaciones). La tarjeta y su letra no se tocaron: Wilson usa el mismo `GenerarTarjeta`.
 - [ ] Hay que tocar unas 14 funciones. El riesgo es olvidar una comprobación y dejar que Wilson vea algo de las otras páginas. Por eso T7 exige revisión en cada función, no solo en pantalla.
 - [ ] Si David elige una imagen de Alejandro para las páginas de Wilson, Wilson la ve y tiene que armarla. Si no se quiere eso, se limita la lista de páginas por quién subió la imagen.
 - [ ] Una imagen elegida para páginas de los dos recibe una sola captura y un solo estado Armada. Cualquiera de los dos puede marcarla.
