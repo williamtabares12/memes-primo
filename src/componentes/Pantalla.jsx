@@ -1,5 +1,6 @@
-// Envoltorio compartido por las 4 pantallas: ancho máximo para
-// verse bien en celular, con algo de aire arriba/abajo.
+// Envoltorio compartido por todas las pantallas: ancho máximo para
+// verse bien en celular, con algo de aire arriba/abajo y la marca de
+// la app (Gconted - El Queru S.A.S) arriba.
 export default function Pantalla({ children }) {
   return (
     <main
@@ -13,6 +14,10 @@ export default function Pantalla({ children }) {
         minHeight: "100svh",
       }}
     >
+      <header className="marca">
+        <span className="marca-nombre">Gconted</span>
+        <span className="marca-empresa">El Queru S.A.S</span>
+      </header>
       {children}
     </main>
   );

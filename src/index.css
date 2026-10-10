@@ -303,3 +303,37 @@ textarea {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Marca de la app: Gconted - El Queru S.A.S. Serif para el nombre,
+   igual que los títulos; la razón social va chica y en gris. */
+.marca {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-suave);
+}
+
+.marca-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 700 17px/1 var(--serif);
+  color: var(--text-h);
+}
+
+.marca-nombre::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cian);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cian) 25%, transparent);
+}
+
+.marca-empresa {
+  font: 500 12px/1 var(--sans);
+  letter-spacing: 0.02em;
+  color: var(--text);
+}

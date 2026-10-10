@@ -17,7 +17,7 @@ import Pantalla from "./componentes/Pantalla.jsx";
 function Inicio() {
   return (
     <Pantalla>
-      <h1>App de memes</h1>
+      <h1>Gconted</h1>
       <p>Este enlace no lleva a ninguna pantalla. Pídele a Alejandro el tuyo.</p>
     </Pantalla>
   );

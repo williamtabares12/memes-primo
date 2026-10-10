@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <rect width="48" height="48" rx="12" fill="#9a2ee6" />
-  <rect x="10" y="12" width="28" height="24" rx="4" fill="none" stroke="#fff" stroke-width="2.6" />
-  <circle cx="18" cy="20" r="3" fill="#fff" />
-  <path d="M12 32l8-8 6 6 6-7 6 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+  <rect width="48" height="48" rx="12" fill="#1d1f20" />
+  <text x="24" y="33" text-anchor="middle" font-family="'Libre Baskerville', Georgia, serif" font-size="28" font-weight="700" fill="#ffffff">G</text>
+  <circle cx="37" cy="12" r="3.2" fill="#00d0ff" />
 </svg>
