@@ -4,7 +4,7 @@ import Pantalla from "../componentes/Pantalla.jsx";
 import BarraInferior from "../componentes/BarraInferior.jsx";
 import BarraProgreso from "../componentes/BarraProgreso.jsx";
 import { IconoCheck, IconoSubir } from "../componentes/Iconos.jsx";
-import { FUENTES } from "../componentes/fuentes.js";
+import { fuentesParaSubir } from "../componentes/fuentes.js";
 
 // Pantalla "Subir lote" (Alejandro, H1). Elige las imágenes, escribe
 // la fuente una sola vez y sube. Las imágenes van directo a R2 desde
@@ -213,7 +213,7 @@ export default function SubirLote() {
           <option value="" disabled>
             Elige una fuente
           </option>
-          {FUENTES.map((f) => (
+          {fuentesParaSubir(usuario).map((f) => (
             <option key={f} value={f}>
               {f}
             </option>
